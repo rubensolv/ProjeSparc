@@ -1,0 +1,284 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configurationDescriptor version="100">
+  <logicalFolder name="root" displayName="root" projectFiles="true" kind="ROOT">
+    <df root="." name="0">
+      <df name="bwapidata">
+        <df name="include">
+          <df name="Util">
+            <in>Exceptions.cpp</in>
+            <in>FileLogger.cpp</in>
+            <in>Logger.cpp</in>
+            <in>Strings.cpp</in>
+            <in>sha1.cpp</in>
+          </df>
+          <in>AIModule.cpp</in>
+          <in>BWAPI.cpp</in>
+          <in>Bitmap.cpp</in>
+          <in>BulletType.cpp</in>
+          <in>Color.cpp</in>
+          <in>Common.cpp</in>
+          <in>DamageType.cpp</in>
+          <in>Error.cpp</in>
+          <in>Event.cpp</in>
+          <in>ExplosionType.cpp</in>
+          <in>GameType.cpp</in>
+          <in>Order.cpp</in>
+          <in>PlayerType.cpp</in>
+          <in>Position.cpp</in>
+          <in>Race.cpp</in>
+          <in>TechType.cpp</in>
+          <in>TilePosition.cpp</in>
+          <in>UnitCommandType.cpp</in>
+          <in>UnitSizeType.cpp</in>
+          <in>UnitType.cpp</in>
+          <in>UpgradeType.cpp</in>
+          <in>WeaponType.cpp</in>
+        </df>
+      </df>
+      <df name="source">
+        <df name="glfont2">
+          <in>glfont.cc</in>
+        </df>
+        <df name="gui">
+          <in>GUI.cpp</in>
+          <in>GUIGame.cpp</in>
+          <in>GUITools.cpp</in>
+        </df>
+        <df name="main">
+          <in>SearchExperiment.cpp</in>
+          <in>main.cpp</in>
+        </df>
+        <in>Action.cpp</in>
+        <in>AllPlayers.cpp</in>
+        <in>AlphaBetaMove.cpp</in>
+        <in>AlphaBetaSearch.cpp</in>
+        <in>AnimationFrameData.cpp</in>
+        <in>Common.cpp</in>
+        <in>EnumData.cpp</in>
+        <in>Game.cpp</in>
+        <in>GameState.cpp</in>
+        <in>Hash.cpp</in>
+        <in>Logger.cpp</in>
+        <in>MoveArray.cpp</in>
+        <in>Player.cpp</in>
+        <in>PlayerProperties.cpp</in>
+        <in>Player_AlphaBeta.cpp</in>
+        <in>Player_AttackClosest.cpp</in>
+        <in>Player_AttackDPS.cpp</in>
+        <in>Player_AttackWeakest.cpp</in>
+        <in>Player_Cluster.cpp</in>
+        <in>Player_Kiter.cpp</in>
+        <in>Player_KiterDPS.cpp</in>
+        <in>Player_Kiter_NOKDPS.cpp</in>
+        <in>Player_NOKDPS.cpp</in>
+        <in>Player_PortfolioGreedySearch.cpp</in>
+        <in>Player_Random.cpp</in>
+        <in>Player_UCT.cpp</in>
+        <in>PortfolioGreedySearch.cpp</in>
+        <in>SparCraft.cpp</in>
+        <in>SparCraftAssert.cpp</in>
+        <in>SparCraftException.cpp</in>
+        <in>Timer.cpp</in>
+        <in>TranspositionTable.cpp</in>
+        <in>TutorialCode.cpp</in>
+        <in>UCTSearch.cpp</in>
+        <in>Unit.cpp</in>
+        <in>UnitProperties.cpp</in>
+        <in>UnitScriptData.cpp</in>
+        <in>WeaponProperties.cpp</in>
+      </df>
+    </df>
+    <logicalFolder name="ExternalFiles"
+                   displayName="Arquivos Importantes"
+                   projectFiles="false"
+                   kind="IMPORTANT_FILES_FOLDER">
+      <itemPath>Makefile</itemPath>
+      <itemPath>nbproject/private/launcher.properties</itemPath>
+    </logicalFolder>
+  </logicalFolder>
+  <sourceFolderFilter>^(nbproject)$</sourceFolderFilter>
+  <sourceRootList>
+    <Elem>.</Elem>
+  </sourceRootList>
+  <projectmakefile>Makefile</projectmakefile>
+  <confs>
+    <conf name="Default" type="0">
+      <toolsSet>
+        <compilerSet>default</compilerSet>
+        <dependencyChecking>false</dependencyChecking>
+        <rebuildPropChanged>false</rebuildPropChanged>
+      </toolsSet>
+      <codeAssistance>
+      </codeAssistance>
+      <makefileType>
+        <makeTool>
+          <buildCommandWorkingDir>.</buildCommandWorkingDir>
+          <buildCommand>${MAKE} -f Makefile</buildCommand>
+          <cleanCommand>${MAKE} -f Makefile clean</cleanCommand>
+          <executablePath></executablePath>
+        </makeTool>
+        <preBuild>
+          <preBuildCommandWorkingDir>.</preBuildCommandWorkingDir>
+          <preBuildCommand></preBuildCommand>
+        </preBuild>
+      </makefileType>
+      <item path="bwapidata/include/AIModule.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="bwapidata/include/BWAPI.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="bwapidata/include/Bitmap.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="bwapidata/include/BulletType.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="bwapidata/include/Color.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="bwapidata/include/Common.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="bwapidata/include/DamageType.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="bwapidata/include/Error.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="bwapidata/include/Event.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="bwapidata/include/ExplosionType.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="bwapidata/include/GameType.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="bwapidata/include/Order.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="bwapidata/include/PlayerType.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="bwapidata/include/Position.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="bwapidata/include/Race.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="bwapidata/include/TechType.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="bwapidata/include/TilePosition.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="bwapidata/include/UnitCommandType.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="bwapidata/include/UnitSizeType.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="bwapidata/include/UnitType.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="bwapidata/include/UpgradeType.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="bwapidata/include/Util/Exceptions.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="bwapidata/include/Util/FileLogger.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="bwapidata/include/Util/Logger.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="bwapidata/include/Util/Strings.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="bwapidata/include/Util/sha1.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="bwapidata/include/WeaponType.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="source/Action.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="source/AllPlayers.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="source/AlphaBetaMove.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="source/AlphaBetaSearch.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="source/AnimationFrameData.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="source/Common.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="source/EnumData.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="source/Game.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="source/GameState.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="source/Hash.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="source/Logger.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="source/MoveArray.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="source/Player.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="source/PlayerProperties.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="source/Player_AlphaBeta.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="source/Player_AttackClosest.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="source/Player_AttackDPS.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="source/Player_AttackWeakest.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="source/Player_Cluster.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="source/Player_Kiter.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="source/Player_KiterDPS.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="source/Player_Kiter_NOKDPS.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="source/Player_NOKDPS.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="source/Player_PortfolioGreedySearch.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="source/Player_Random.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="source/Player_UCT.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="source/PortfolioGreedySearch.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="source/SparCraft.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="source/SparCraftAssert.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="source/SparCraftException.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="source/Timer.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="source/TranspositionTable.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="source/TutorialCode.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="source/UCTSearch.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="source/Unit.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="source/UnitProperties.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="source/UnitScriptData.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="source/WeaponProperties.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="source/glfont2/glfont.cc" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="source/gui/GUI.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="source/gui/GUIGame.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="source/gui/GUITools.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="source/main/SearchExperiment.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="source/main/main.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+    </conf>
+  </confs>
+</configurationDescriptor>

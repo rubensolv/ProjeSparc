@@ -857,7 +857,7 @@ void SearchExperiment::runExperiment()
 		for (size_t p2Player(0); p2Player < players[1].size(); p2Player++)
 		{
 			// for each state we care about
-			for (size_t state(2); state < states.size(); ++state)
+			for (size_t state(0); state < states.size(); ++state)
 			{
                 char buf[255];
                 fprintf(stderr, "%s  ", configFileSmall.c_str());
@@ -906,6 +906,7 @@ void SearchExperiment::runExperiment()
                 }
                 else
                 {
+                    g.play();
                     gameEval = g.getState().eval(Players::Player_One, SparCraft::EvaluationMethods::LTD2).val();
                 }
 
