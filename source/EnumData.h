@@ -102,29 +102,33 @@ public:
     }
 };
 
-class PlayerModels : public EnumData<PlayerModels>
-{
-public:
-    enum { AlphaBeta, AttackClosest, Kiter, Random, AttackWeakest, AttackDPS, KiterDPS, NOKDPS, Kiter_NOKDPS, Cluster, PortfolioGreedySearch, UCT, None, Size };
-    static void init()
-    {
-        setType("PlayerModels");
-        names.resize(Size);
-        setData(AlphaBeta,              "AlphaBeta");
-		setData(AttackClosest,          "AttackClosest");
-		setData(Kiter,                  "Kiter");
-		setData(Random,                 "Random");
-		setData(AttackWeakest,          "AttackWeakest");
-		setData(AttackDPS,              "AttackDPS");
-		setData(KiterDPS,               "KiterDPS");
-		setData(NOKDPS,                 "NOKDPS");
-        setData(Kiter_NOKDPS,           "Kiter_NOKDPS");
-        setData(Cluster,                "Cluster");
-        setData(PortfolioGreedySearch,  "PortfolioGreedySearch");
-        setData(UCT,                    "UCT");
-		setData(None,                   "None");
-    }
-};
+    class PlayerModels : public EnumData<PlayerModels> {
+    public:
+
+        enum {
+            AlphaBeta, AttackClosest, Kiter, Random, AttackWeakest, 
+            AttackDPS, KiterDPS, NOKDPS, Kiter_NOKDPS, Cluster, PortfolioGreedySearch, 
+            UCT, None, Size
+        };
+
+        static void init() {
+            setType("PlayerModels");
+            names.resize(Size);
+            setData(AlphaBeta, "AlphaBeta");
+            setData(AttackClosest, "AttackClosest");
+            setData(Kiter, "Kiter");
+            setData(Random, "Random");
+            setData(AttackWeakest, "AttackWeakest");
+            setData(AttackDPS, "AttackDPS");
+            setData(KiterDPS, "KiterDPS");
+            setData(NOKDPS, "NOKDPS");
+            setData(Kiter_NOKDPS, "Kiter_NOKDPS");
+            setData(Cluster, "Cluster");
+            setData(PortfolioGreedySearch, "PortfolioGreedySearch");
+            setData(UCT, "UCT");
+            setData(None, "None");
+        }
+    };
 
 class EvaluationMethods : public EnumData<EvaluationMethods>
 {
