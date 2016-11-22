@@ -1,5 +1,5 @@
 CC=g++
-BWAPI_DIR=/home/rubens/Sparcraft/bwapi/bwapi
+BWAPI_DIR=/home/rubens/bwapi/bwapi
 SDL_LDFLAGS=`sdl2-config --libs` 
 SDL_CFLAGS=`sdl2-config --cflags` 
 CFLAGS=-O3 -std=c++11 $(SDL_CFLAGS)
