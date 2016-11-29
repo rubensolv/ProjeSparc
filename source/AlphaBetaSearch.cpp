@@ -26,12 +26,12 @@ AlphaBetaSearch::AlphaBetaSearch(const AlphaBetaSearchParameters & params, TTPtr
 void AlphaBetaSearch::doSearch(GameState & initialState)
 {
 	_searchTimer.start();
-
+        
 	StateEvalScore alpha(-10000000, 1000000);
 	StateEvalScore beta	( 10000000, 1000000);
 
 	AlphaBetaValue val;
-
+        
 	if (_params.searchMethod() == SearchMethods::AlphaBeta)
 	{
 		val = alphaBeta(initialState, _params.maxDepth(), Players::Player_None, NULL, alpha, beta);

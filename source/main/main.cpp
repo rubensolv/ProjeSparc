@@ -11,7 +11,7 @@ int main(int argc, char *argv[])
     SparCraft::init();
 
     try
-    {
+    {        
         if (argc == 2)
         {
             SparCraft::SearchExperiment exp(argv[1]);

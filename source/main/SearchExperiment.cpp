@@ -445,8 +445,9 @@ void SearchExperiment::addPlayer(const std::string & line)
     iss >> playerModelString;
 
     playerStrings[playerID].push_back(playerModelString);
-
+    
     playerModelID = PlayerModels::getID(playerModelString);
+    
 
     //std::cout << "Player " << playerID << " adding type " << playerModelString << " (" << playerModelID << ")" << std::endl;
 
@@ -485,6 +486,10 @@ void SearchExperiment::addPlayer(const std::string & line)
 	else if (playerModelID == PlayerModels::Random)				
     { 
         players[playerID].push_back(PlayerPtr(new Player_Random(playerID))); 
+    }
+        else if (playerModelID == PlayerModels::GenerationClass)				
+    { 
+        players[playerID].push_back(PlayerPtr(new GenerationClass(playerID))); 
     }
     else if (playerModelID == PlayerModels::PortfolioGreedySearch)				
     { 

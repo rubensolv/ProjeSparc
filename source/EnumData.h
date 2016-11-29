@@ -102,13 +102,16 @@ public:
     }
 };
 
-class PlayerModels : public EnumData<PlayerModels>
-{
-public:
-    enum { AlphaBeta, AttackClosest, Kiter, Random, AttackWeakest, AttackDPS, KiterDPS, NOKDPS, Kiter_NOKDPS, Cluster, PortfolioGreedySearch, UCT, None, Size, GenerationClass };
-    static void init()
-    {
-        setType("PlayerModels");
+    class PlayerModels : public EnumData<PlayerModels> {
+    public:
+
+        enum {
+            AlphaBeta, AttackClosest, Kiter, Random, AttackWeakest, AttackDPS, KiterDPS, NOKDPS, Kiter_NOKDPS, Cluster, 
+            PortfolioGreedySearch, UCT, GenerationClass, None, Size
+        };
+
+        static void init() {
+            setType("PlayerModels");
             names.resize(Size);
             setData(AlphaBeta, "AlphaBeta");
             setData(AttackClosest, "AttackClosest");
@@ -125,9 +128,9 @@ public:
             //incluída para teste
             setData(GenerationClass, "GenerationClass");
             setData(None, "None");
-            
-    }
-};
+
+        }
+    };
 
 class EvaluationMethods : public EnumData<EvaluationMethods>
 {
