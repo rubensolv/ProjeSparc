@@ -25,5 +25,8 @@ namespace SparCraft {
     private:
         void testarMovimentos(GameState & state, const MoveArray & moves, std::vector<Action> & moveVec);        
         void listaOrdenada(const IDType & playerID, const Unit & unidade, GameState & state, std::vector<Unit> & unidades);
+        //void aplicarAbstracao(GameState & origState);
+        void copiarStateCleanUnit(GameState & origState, GameState & copState);
+        void aplicarAlphaBeta(GameState & state, const MoveArray & moves, std::vector<Action> & moveVec);
     };
 }

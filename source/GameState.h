@@ -77,6 +77,8 @@ public:
     const Unit &            getClosestOurUnit(const IDType & player, const IDType & unitIndex);
     const Unit &            getUnitDirect(const IDType & player, const IDType & unit)               const;
     const Unit &            getNeutralUnit(const size_t & u)                                        const;
+    void                    removeUnit(const Unit & un);
+    void                    cleanUpStateUnits();
     
     // game time functions
     void                    setTime(const TimeType & time);

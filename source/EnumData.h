@@ -123,7 +123,7 @@ public:
             setData(PortfolioGreedySearch, "PortfolioGreedySearch");
             setData(UCT, "UCT");
             //incluída para teste
-            setData(GenerationClass, "GenerationClass")
+            setData(GenerationClass, "GenerationClass");
             setData(None, "None");
             
     }

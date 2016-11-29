@@ -524,6 +524,18 @@ void GameState::addUnit(const Unit & u)
     }
 }
 
+// Remove specific Unit to the state 
+// This function will remove and decrement the number os units
+void GameState::removeUnit(const Unit& un){
+    //remove a unidade do vetor
+    getUnit(un.player(), _numUnits[un.player()]);
+    
+    //decrementa o numero de unidades que o player tem
+    _numUnits[un.player()]--;
+    _prevNumUnits[un.player()]--;
+    
+}
+
 // Add a unit with given parameters to the state
 // This function will give the unit a unique unitID
 void GameState::addUnit(const BWAPI::UnitType type, const IDType playerID, const Position & pos)
@@ -1097,4 +1109,23 @@ void GameState::read(const std::string & filename)
     std::ifstream fin (filename.c_str(), std::ios::in | std::ios::binary);
     fin.read((char *)this, sizeof(*this));
     fin.close();
+}
+
+// Apply a clean up to units in state
+// This function remove all informations about units 
+void GameState::cleanUpStateUnits(){
+    _numUnits.fill(0);
+    _prevNumUnits.fill(0);
+    _numMovements.fill(0);
+    _prevHPSum.fill(0);
+
+    _units[0] = std::vector<Unit>(Constants::Max_Units, Unit());
+    _units[1] = std::vector<Unit>(Constants::Max_Units, Unit());
+    _unitIndex[0] = std::vector<int>(Constants::Max_Units, 0);
+    _unitIndex[1] = std::vector<int>(Constants::Max_Units, 0);
+
+    for (size_t u(0); u < _maxUnits; ++u) {
+        _unitIndex[0][u] = u;
+        _unitIndex[1][u] = u;
+    }
 }

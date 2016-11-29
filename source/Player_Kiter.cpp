@@ -14,7 +14,7 @@ Player_Kiter::Player_Kiter (const IDType & playerID)
 void Player_Kiter::testarMovimentos(GameState & state, const MoveArray & moves, std::vector<Action> & moveVec){
     
     //std::cout<< "Valores do estado "<< state.toString()<< "\n";
-    std::cout<< moves.numUnits() <<std::endl;   
+    //std::cout<< moves.numUnits() <<" total de unidades"<<std::endl;   
     
     for (IDType u(0); u < moves.numUnits(); u++) {        
         const Unit & ourUnit           (state.getUnit(_playerID,u));
@@ -25,11 +25,38 @@ void Player_Kiter::testarMovimentos(GameState & state, const MoveArray & moves, 
         std::vector<Unit> unidades;
         listaOrdenada(_playerID, ourUnit, state, unidades);
         
-        std::cout << "---------------------------\n";
-        for(auto& un : unidades){
-            un.print();
-        }
-
+        //std::cout << "---------------------------\n";
+        //for(auto& un : unidades){
+        //    un.print();
+        //}
+        
+        //efetua a cópia do estado 
+        GameState newState;
+        copiarStateCleanUnit(state, newState);
+        //verificar a remoção das unidades não desejadas
+        
+        std::cout<<" Minha unidade :\n";
+        ourUnit.print();
+        std::cout<<" Unidade inimiga :\n";
+        enemy.print();
+        
+        std::cout<<" Estado atual :";
+        newState.print();
+        
+                
+        std::cout<<" Estado após remoção :";
+        newState.print();
+        
+        std::cout<<" Estado após inclusões :";
+        newState.addUnit(ourUnit);
+        newState.addUnit(enemy);
+        newState.print();
+        
+        
+        
+        std::cout<<" Estado origial :";
+        state.print();
+        
     }
 }
 
@@ -61,6 +88,19 @@ void Player_Kiter::listaOrdenada(const IDType& playerID, const Unit & unidade, G
     for(myIt = unitsOrder.begin(); myIt != unitsOrder.end(); myIt++){
         unidades.push_back(myIt->second);
     }   
+}
+/*
+ * Função tem o objetivo de realizar a cópia do state e já devolver ela 
+ * com as unidades zeradas, mantando assim as outras informações 
+ * necessárias.
+ */
+void Player_Kiter::copiarStateCleanUnit(GameState& origState, GameState& copState){
+    copState = origState;
+    copState.cleanUpStateUnits();
+}
+
+void Player_Kiter::aplicarAlphaBeta(GameState& state, const MoveArray& moves, std::vector<Action>& moveVec){
+    
 }
 
 //############################################################################################
