@@ -5,32 +5,32 @@ using namespace SparCraft;
 
 GenerationClass::GenerationClass(const IDType& playerID) {
     _playerID = playerID;
+    iniciarAlphaBeta();
 }
 
 void GenerationClass::getMoves(GameState& state, const MoveArray& moves, std::vector<Action>& moveVec) {
     moveVec.clear();
-    iniciarAlphaBeta();
     //std::cout<< "Valores do estado "<< state.toString()<< "\n";
     //std::cout<< moves.numUnits() <<" total de unidades"<<std::endl;   
-    
+    GameState newState;
+   // std::cout << "Original state:" << std::endl;
+   // state.print();
     for (IDType u(0); u < moves.numUnits(); u++) {        
         const Unit & ourUnit           (state.getUnit(_playerID,u));
         const Unit & enemy (state.getClosestEnemyUnit(_playerID, ourUnit.ID(), false));
         
         //efetua a cópia do estado 
-        GameState newState;
         copiarStateCleanUnit(state, newState);
-        
-        
+                   
         //adiciona as unidades da abstração
         newState.addUnit(ourUnit);
         newState.addUnit(enemy);
         
-        
         alphaBeta->doSearch(newState);
-        
-        moveVec.assign(alphaBeta->getResults().bestMoves.begin(), alphaBeta->getResults().bestMoves.end());
-        
+       
+     
+        //moveVec.assign(alphaBeta->getResults().bestMoves.begin(), alphaBeta->getResults().bestMoves.end());
+        moveVec.insert(moveVec.cend(),alphaBeta->getResults().bestMoves.begin(), alphaBeta->getResults().bestMoves.end());
     }
 }
 
@@ -100,7 +100,7 @@ void GenerationClass::iniciarAlphaBeta() {
 
     // set the parameters from the options in the file
     params.setMaxPlayer(_playerID);
-    params.setTimeLimit(20);
+    params.setTimeLimit(4);
     params.setMaxChildren(20);
     params.setMoveOrderingMethod(moveOrderingID);
     params.setEvalMethod(evalMethodID);

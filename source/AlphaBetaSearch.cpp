@@ -406,7 +406,7 @@ AlphaBetaValue AlphaBetaSearch::alphaBeta(GameState & state, size_t depth, const
 	// move generation
 	MoveArray & moves = _allMoves[depth];
 	state.generateMoves(moves, playerToMove);
-    moves.shuffleMoveActions();
+        moves.shuffleMoveActions();
 	generateOrderedMoves(state, moves, TTval, playerToMove, depth);
 
 	// while we have more simultaneous moves
