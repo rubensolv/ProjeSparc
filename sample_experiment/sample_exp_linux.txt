@@ -60,11 +60,11 @@
 #Player 0 UCT 40 1.6 5000 20 ScriptFirst Playout NOKDPS NOKDPS Alternate NOKDPS
 
 # Sample PortfolioGreedySearch Players
-Player 1 PortfolioGreedySearch 0 NOKDPS 1 0
+#Player 1 PortfolioGreedySearch 0 NOKDPS 1 0
 
 # Sample Scripted Players
 Player 0 GenerationClass
-#Player 1 Kiter
+Player 1 Kiter
 
 ####################################################
 #
@@ -98,7 +98,7 @@ Player 0 GenerationClass
 #State StateDescriptionFile 10 PATH_TO\sample_state.txt
 
 # Sample SeparatedState States
-State SeparatedState 2 128 128 400 360 840 360 Protoss_Dragoon 4
+State SeparatedState 2 128 128 400 360 840 360 Protoss_Dragoon 25
 #State SeparatedState 100 128 128 400 360 840 360 Zerg_Zergling 50
 #State SeparatedState 100 128 128 400 360 840 360 Protoss_Dragoon 25 Protoss_Zealot 25
 #State SeparatedState 100 128 128 400 360 840 360 Protoss_Dragoon 25 Terran_Marine 25

@@ -16,22 +16,34 @@ void GenerationClass::getMoves(GameState& state, const MoveArray& moves, std::ve
    // std::cout << "Original state:" << std::endl;
    // state.print();
     for (IDType u(0); u < moves.numUnits(); u++) {        
-        const Unit & ourUnit           (state.getUnit(_playerID,u));
+        
+        const Unit & ourUnit           (state.getUnit(_playerID,u));        
+        const Unit & ourUnit2          (state.getClosestOurUnit(_playerID, ourUnit.ID()));
+        
         const Unit & enemy (state.getClosestEnemyUnit(_playerID, ourUnit.ID(), false));
+        const Unit & enemy2 (state.getClosestOurUnit(enemy.player(), enemy.ID()));
         
         //efetua a cópia do estado 
         copiarStateCleanUnit(state, newState);
                    
         //adiciona as unidades da abstração
-        newState.addUnit(ourUnit);
-        newState.addUnit(enemy);
+        newState.addUnitWithID(ourUnit);
+        newState.addUnitWithID(enemy);
         
         alphaBeta->doSearch(newState);
-       
      
         //moveVec.assign(alphaBeta->getResults().bestMoves.begin(), alphaBeta->getResults().bestMoves.end());
-        moveVec.insert(moveVec.cend(),alphaBeta->getResults().bestMoves.begin(), alphaBeta->getResults().bestMoves.end());
+        //moveVec.insert(moveVec.cend(),alphaBeta->getResults().bestMoves.begin(), alphaBeta->getResults().bestMoves.end());        
+        Action mov = alphaBeta->getResults().bestMoves[0];
+        moveVec.push_back( Action((int)u,mov.player(), mov.type(), mov.index(), mov.pos() ));
+        
+    }   
+    
+    std::cout<<"************* INICIO Generator  **************"<<std::endl;
+    for(auto & ac : moveVec){
+        std::cout<<ac.debugString()<<std::endl;
     }
+    std::cout<<"************* FIM Generator  **************"<<std::endl;
 }
 
 bool evalUnitDistance(const Unit& u1, const Unit& u2){
@@ -100,7 +112,7 @@ void GenerationClass::iniciarAlphaBeta() {
 
     // set the parameters from the options in the file
     params.setMaxPlayer(_playerID);
-    params.setTimeLimit(4);
+    params.setTimeLimit(40);
     params.setMaxChildren(20);
     params.setMoveOrderingMethod(moveOrderingID);
     params.setEvalMethod(evalMethodID);
@@ -111,7 +123,7 @@ void GenerationClass::iniciarAlphaBeta() {
     if (moveOrderingID == MoveOrderMethod::ScriptFirst) {
         params.addOrderedMoveScript(PlayerModels::NOKDPS);
         params.addOrderedMoveScript(PlayerModels::KiterDPS);
-        //params.addOrderedMoveScript(PlayerModels::Cluster);
+        params.addOrderedMoveScript(PlayerModels::Cluster);
         //params.addOrderedMoveScript(PlayerModels::AttackWeakest);
     }
 
@@ -127,7 +139,7 @@ void GenerationClass::iniciarAlphaBeta() {
     }
 
     //PlayerPtr abPlayer(new Player_AlphaBeta(_playerID, params, TTPtr((TranspositionTable *) NULL)));
-    alphaBeta = new AlphaBetaSearch(params, TTPtr((TranspositionTable *) NULL));
+    alphaBeta = new AlphaBetaSearchAbstract(params, TTPtr((TranspositionTable *) NULL));
     
 }
 

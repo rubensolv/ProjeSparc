@@ -10,15 +10,15 @@
 
 #include "Player.h"
 #include "AlphaBetaSearchParameters.hpp"
-#include "AlphaBetaSearch.h"
+#include "AlphaBetaSearchAbstract.h"
 
 class TranspositionTable;
 
 namespace SparCraft {
-    class AlphaBetaSearch;
+    class AlphaBetaSearchAbstract;
     
     class GenerationClass : public Player {
-        AlphaBetaSearch * alphaBeta;
+        AlphaBetaSearchAbstract * alphaBeta;
     public:
 
         GenerationClass(const IDType & playerID);

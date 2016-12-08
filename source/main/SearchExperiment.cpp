@@ -918,14 +918,17 @@ void SearchExperiment::runExperiment()
                 numGames[p1Player][p2Player]++;
                 if (gameEval > 0)
                 {
+                    std::cout << " Vitoria Jogador 0" << std::endl;
                     numWins[p1Player][p2Player]++;
                 }
                 else if (gameEval < 0)
                 {
+                    std::cout << " Vitoria Jogador 1" << std::endl;
                     numLosses[p1Player][p2Player]++;
                 }
                 else if (gameEval == 0)
                 {
+                    std::cout << " Empate" << std::endl;
                     numDraws[p1Player][p2Player]++;
                 }
 

@@ -23,7 +23,7 @@ class AlphaBetaSearchParameters;
 class Player;
 
 
-class AlphaBetaSearch
+class AlphaBetaSearchAbstract
 {
 	AlphaBetaSearchParameters               _params;
 	AlphaBetaSearchResults                  _results;
@@ -45,7 +45,7 @@ class AlphaBetaSearch
 
 public:
 
-	AlphaBetaSearch(const AlphaBetaSearchParameters & params, TTPtr TT = TTPtr((TranspositionTable *)NULL));
+	AlphaBetaSearchAbstract(const AlphaBetaSearchParameters & params, TTPtr TT = TTPtr((TranspositionTable *)NULL));
 
 	void doSearch(GameState & initialState);
 
