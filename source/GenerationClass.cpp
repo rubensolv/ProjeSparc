@@ -25,11 +25,14 @@ void GenerationClass::getMoves(GameState& state, const MoveArray& moves, std::ve
         
         //efetua a cópia do estado 
         copiarStateCleanUnit(state, newState);
-                   
+        
+
         //adiciona as unidades da abstração
-        newState.addUnitWithID(ourUnit);
+        newState.addUnitWithID(ourUnit);       
         newState.addUnitWithID(enemy);
         
+
+       
         alphaBeta->doSearch(newState);
      
         //moveVec.assign(alphaBeta->getResults().bestMoves.begin(), alphaBeta->getResults().bestMoves.end());

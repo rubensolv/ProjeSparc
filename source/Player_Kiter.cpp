@@ -98,4 +98,10 @@ void Player_Kiter::getMoves(GameState & state, const MoveArray & moves, std::vec
 			
 		moveVec.push_back(moves.getMove(u, bestMoveIndex));
 	}
+    
+    std::cout<<"************* INICIO Kiter  **************"<<std::endl;
+    for(auto & ac : moveVec){
+        std::cout<<ac.debugString()<<std::endl;
+    }
+    std::cout<<"************* FIM Kiter  **************"<<std::endl;
 }
