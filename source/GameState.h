@@ -79,6 +79,7 @@ public:
     const Unit &            getNeutralUnit(const size_t & u)                                        const;
     void                    removeUnit(const Unit & un);
     void                    cleanUpStateUnits();
+    int                     getIndexUnit(const IDType & player, const IDType & unitID);
     
     // game time functions
     void                    setTime(const TimeType & time);

@@ -10,6 +10,46 @@ GenerationClass::GenerationClass(const IDType& playerID) {
 
 void GenerationClass::getMoves(GameState& state, const MoveArray& moves, std::vector<Action>& moveVec) {
     moveVec.clear();
+    //estado que será utilizado para simular as variações necessárias do AB
+    GameState newState;
+    //obtem nossa unidade inicial.
+    const Unit & ourUnit           (state.getUnit(_playerID,(0)));        
+    const Unit & enemy (state.getClosestEnemyUnit(_playerID, ourUnit.ID(), false));
+    
+    std::vector<Unit> unidadesAliadas ;
+    std::vector<Unit> unidadesInimigas;
+    
+    listaOrdenada(_playerID, ourUnit, state, unidadesAliadas);
+    listaOrdenada(enemy.player(), enemy, state, unidadesInimigas);
+            
+    for(auto & un : unidadesAliadas){
+        copiarStateCleanUnit(state, newState);
+        //adiciono o número de unidades que desejamos na abstração
+        newState.addUnitWithID(un);
+        const Unit & enemy2 (state.getClosestEnemyUnit(_playerID, un.ID(), false));
+        newState.addUnitWithID(enemy2);
+        
+        //executa a busca
+        alphaBeta->doSearch(newState);
+        Action mov = alphaBeta->getResults().bestMoves[0];
+        if(mov.type() == ActionTypes::ATTACK){
+            moveVec.push_back( Action( state.getIndexUnit(un.player(), un.ID()) ,mov.player(), mov.type(), state.getIndexUnit(enemy.player(), enemy.ID()), mov.pos() ));
+        }else{
+            moveVec.push_back( Action(state.getIndexUnit(un.player(), un.ID()),mov.player(), mov.type(), mov.index(), mov.pos() ));
+        }
+        
+    }
+    
+    std::cout<<"************* INICIO Generator  **************"<<std::endl;
+    for(auto & ac : moveVec){
+        std::cout<<ac.debugString()<<std::endl;
+    }
+    std::cout<<"************* FIM Generator  **************"<<std::endl;
+    
+}
+
+void GenerationClass::getMoves2(GameState& state, const MoveArray& moves, std::vector<Action>& moveVec) {
+    moveVec.clear();
     //std::cout<< "Valores do estado "<< state.toString()<< "\n";
     //std::cout<< moves.numUnits() <<" total de unidades"<<std::endl;   
     GameState newState;
@@ -42,11 +82,11 @@ void GenerationClass::getMoves(GameState& state, const MoveArray& moves, std::ve
         
     }   
     
-    std::cout<<"************* INICIO Generator  **************"<<std::endl;
-    for(auto & ac : moveVec){
-        std::cout<<ac.debugString()<<std::endl;
-    }
-    std::cout<<"************* FIM Generator  **************"<<std::endl;
+    //std::cout<<"************* INICIO Generator  **************"<<std::endl;
+    //for(auto & ac : moveVec){
+    //    std::cout<<ac.debugString()<<std::endl;
+    //}
+    //std::cout<<"************* FIM Generator  **************"<<std::endl;
 }
 
 bool evalUnitDistance(const Unit& u1, const Unit& u2){
@@ -73,7 +113,7 @@ void GenerationClass::listaOrdenada(const IDType& playerID, const Unit & unidade
             unitsOrder[distSq] = t;
         }
     }
-    
+    unidades.push_back(unidade);
     for(myIt = unitsOrder.begin(); myIt != unitsOrder.end(); myIt++){
         unidades.push_back(myIt->second);
     }   

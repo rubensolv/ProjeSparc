@@ -23,6 +23,7 @@ namespace SparCraft {
 
         GenerationClass(const IDType & playerID);
         void getMoves(GameState & state, const MoveArray & moves, std::vector<Action> & moveVec);
+        void getMoves2(GameState & state, const MoveArray & moves, std::vector<Action> & moveVec);
         IDType getType() { return PlayerModels::Kiter; }
         void listaOrdenada(const IDType & playerID, const Unit & unidade, GameState & state, std::vector<Unit> & unidades);
         //void aplicarAbstracao(GameState & origState);
