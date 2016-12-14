@@ -80,6 +80,7 @@ public:
     void                    removeUnit(const Unit & un);
     void                    cleanUpStateUnits();
     int                     getIndexUnit(const IDType & player, const IDType & unitID);
+    bool                    unitExist(const IDType & player, const IDType & unitID);
     
     // game time functions
     void                    setTime(const TimeType & time);

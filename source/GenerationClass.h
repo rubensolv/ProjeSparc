@@ -30,8 +30,8 @@ namespace SparCraft {
         void copiarStateCleanUnit(GameState & origState, GameState & copState);
         void aplicarAlphaBeta(GameState & state, const MoveArray & moves, std::vector<Action> & moveVec);
         void iniciarAlphaBeta();
-    private:
-
+    private:        
+        std::vector<Unit> retornaQtdUnidadesMaisProximas(const IDType & playerId, const Unit & unitRef, GameState & state, int qtdUnidades);
     };
 }
 

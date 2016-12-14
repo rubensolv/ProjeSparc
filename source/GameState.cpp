@@ -652,6 +652,19 @@ int GameState::getIndexUnit(const IDType& player, const IDType& unitID){
         }
 }
 
+bool GameState::unitExist(const IDType& player, const IDType& unitID){
+    
+    for (IDType u(0); u<numUnits(player); ++u)
+	{
+		if (getUnit(player, u).ID() == unitID)
+		{
+			return true;
+		}
+	}
+
+	return false;
+}
+
 const size_t GameState::closestEnemyUnitDistance(const Unit & unit) const
 {
 	IDType enemyPlayer(getEnemy(unit.player()));

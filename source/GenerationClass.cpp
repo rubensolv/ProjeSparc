@@ -10,33 +10,65 @@ GenerationClass::GenerationClass(const IDType& playerID) {
 
 void GenerationClass::getMoves(GameState& state, const MoveArray& moves, std::vector<Action>& moveVec) {
     moveVec.clear();
+    //
+    int qtdUnPlayerAbstr = 2;
     //estado que será utilizado para simular as variações necessárias do AB
     GameState newState;
+        
     //obtem nossa unidade inicial.
     const Unit & ourUnit           (state.getUnit(_playerID,(0)));        
-    const Unit & enemy (state.getClosestEnemyUnit(_playerID, ourUnit.ID(), false));
     
-    std::vector<Unit> unidadesAliadas ;
+    //vetores ordenados por distancia que conterão as unidades
+    std::vector<Unit> unidadesAliadas ;    
     std::vector<Unit> unidadesInimigas;
     
     listaOrdenada(_playerID, ourUnit, state, unidadesAliadas);
-    listaOrdenada(enemy.player(), enemy, state, unidadesInimigas);
-            
-    for(auto & un : unidadesAliadas){
-        copiarStateCleanUnit(state, newState);
-        //adiciono o número de unidades que desejamos na abstração
-        newState.addUnitWithID(un);
-        const Unit & enemy2 (state.getClosestEnemyUnit(_playerID, un.ID(), false));
-        newState.addUnitWithID(enemy2);
-        
-        //executa a busca
-        alphaBeta->doSearch(newState);
-        Action mov = alphaBeta->getResults().bestMoves[0];
-        if(mov.type() == ActionTypes::ATTACK){
-            moveVec.push_back( Action( state.getIndexUnit(un.player(), un.ID()) ,mov.player(), mov.type(), state.getIndexUnit(enemy.player(), enemy.ID()), mov.pos() ));
-        }else{
-            moveVec.push_back( Action(state.getIndexUnit(un.player(), un.ID()),mov.player(), mov.type(), mov.index(), mov.pos() ));
+    //listaOrdenada(state.getEnemy(_playerID), ourUnit, state, unidadesInimigas);
+    
+    copiarStateCleanUnit(state, newState);
+    for(int x =0; x<state.numUnits(_playerID); x++){
+        if(qtdUnPlayerAbstr != newState.numUnits(_playerID)){
+            //adiciono o número de unidades que desejamos na abstração
+            int limite = x+qtdUnPlayerAbstr;
+            for(int i = x; i < limite; i++){
+                newState.addUnitWithID(unidadesAliadas[i]);
+                listaOrdenada(state.getEnemy(_playerID), unidadesAliadas[i], state, unidadesInimigas);
+                
+                if(! newState.unitExist(unidadesInimigas[x].player(),unidadesInimigas[i].ID())){
+                    std::cout<<"Unidade inimiga:"<< (int)unidadesInimigas[i].ID()<<std::endl;
+                    newState.addUnitWithID(unidadesInimigas[i]);
+                }else{
+                    std::cout<<"Unidade inimiga2:";
+                    std::cout<<"Unidade inimiga2:"<< (int)unidadesInimigas[i].ID()<<std::endl;
+                    newState.addUnitWithID(unidadesInimigas[i+1]);
+                }
+                x++;
+            }
         }
+        if(qtdUnPlayerAbstr == newState.numUnits(_playerID)){
+            //executa a busca
+            alphaBeta->doSearch(newState);
+            for(auto & mov : alphaBeta->getResults().bestMoves){
+                if(mov.type() == ActionTypes::ATTACK){
+                    moveVec.push_back( Action( state.getIndexUnit(_playerID, newState.getUnit(_playerID, mov.unit()).ID() ),
+                                                mov.player(), 
+                                                mov.type(), 
+                                                state.getIndexUnit(state.getEnemy(_playerID), 
+                                                newState.getUnit(state.getEnemy(_playerID), mov.unit()).ID()), 
+                                              mov.pos() ));
+                }else{
+                    moveVec.push_back( Action(state.getIndexUnit(_playerID, newState.getUnit(_playerID, mov.unit()).ID() ),
+                                                mov.player(), 
+                                                mov.type(), 
+                                                mov.index(), 
+                                            mov.pos() ));
+                }    
+            }
+                        
+            copiarStateCleanUnit(state, newState);
+        }
+        
+        
         
     }
     
@@ -93,9 +125,19 @@ bool evalUnitDistance(const Unit& u1, const Unit& u2){
     return u1.position() < u2.position();
 }
 
+
+std::vector<Unit> GenerationClass::retornaQtdUnidadesMaisProximas(const IDType& playerId, const Unit& unitRef, GameState& state, int qtdUnidades){
+    std::vector<Unit> unidades ;    
+    std::vector<Unit> unidadesRetorno ;
+    listaOrdenada(playerId, unitRef, state, unidades);
+    for(int x = 0;x < qtdUnidades; x++){
+        unidadesRetorno.push_back(unidades[x]);
+    }
+}
+
 /*
  * Retorna todas as unidades de um player ordenados pela distância da unidade
- * passada como referência
+ * passada como referência (inclusive a unidade passada como ponto de referencia)
  */
 void GenerationClass::listaOrdenada(const IDType& playerID, const Unit & unidade, GameState& state, std::vector<Unit> & unidades){
     //declaração
@@ -113,7 +155,9 @@ void GenerationClass::listaOrdenada(const IDType& playerID, const Unit & unidade
             unitsOrder[distSq] = t;
         }
     }
-    unidades.push_back(unidade);
+    if(unidade.player() == playerID){
+        unidades.push_back(unidade);
+    }
     for(myIt = unitsOrder.begin(); myIt != unitsOrder.end(); myIt++){
         unidades.push_back(myIt->second);
     }   
