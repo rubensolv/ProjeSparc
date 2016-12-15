@@ -32,6 +32,7 @@ namespace SparCraft {
         void iniciarAlphaBeta();
     private:        
         std::vector<Unit> retornaQtdUnidadesMaisProximas(const IDType & playerId, const Unit & unitRef, GameState & state, int qtdUnidades);
+        Unit getEnemyClosestvalid(GameState & state, std::vector<Unit> unidadesInimigas);
     };
 }
 

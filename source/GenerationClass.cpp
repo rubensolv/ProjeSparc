@@ -26,26 +26,19 @@ void GenerationClass::getMoves(GameState& state, const MoveArray& moves, std::ve
     //listaOrdenada(state.getEnemy(_playerID), ourUnit, state, unidadesInimigas);
     
     copiarStateCleanUnit(state, newState);
-    for(int x =0; x<state.numUnits(_playerID); x++){
+    for(auto & un : unidadesAliadas){
         if(qtdUnPlayerAbstr != newState.numUnits(_playerID)){
             //adiciono o número de unidades que desejamos na abstração
-            int limite = x+qtdUnPlayerAbstr;
-            for(int i = x; i < limite; i++){
-                newState.addUnitWithID(unidadesAliadas[i]);
-                listaOrdenada(state.getEnemy(_playerID), unidadesAliadas[i], state, unidadesInimigas);
-                
-                if(! newState.unitExist(unidadesInimigas[x].player(),unidadesInimigas[i].ID())){
-                    std::cout<<"Unidade inimiga:"<< (int)unidadesInimigas[i].ID()<<std::endl;
-                    newState.addUnitWithID(unidadesInimigas[i]);
-                }else{
-                    std::cout<<"Unidade inimiga2:";
-                    std::cout<<"Unidade inimiga2:"<< (int)unidadesInimigas[i].ID()<<std::endl;
-                    newState.addUnitWithID(unidadesInimigas[i+1]);
-                }
-                x++;
-            }
+            newState.addUnitWithID(un);
+            listaOrdenada(state.getEnemy(_playerID), un, state, unidadesInimigas);
+            newState.addUnitWithID(getEnemyClosestvalid(newState, unidadesInimigas));
         }
-        if(qtdUnPlayerAbstr == newState.numUnits(_playerID)){
+        if(qtdUnPlayerAbstr == newState.numUnits(_playerID)
+                or newState.numUnits(_playerID) == state.numUnits(_playerID)){
+            //remover
+            //std::cout<< "Qtd unidades na abstração:"<<newState.numUnits(_playerID) <<std::endl;
+            //newState.print();
+            
             //executa a busca
             alphaBeta->doSearch(newState);
             for(auto & mov : alphaBeta->getResults().bestMoves){
@@ -71,13 +64,22 @@ void GenerationClass::getMoves(GameState& state, const MoveArray& moves, std::ve
         
         
     }
+    //remover
+    //std::cout<<"************* INICIO Generator  **************"<<std::endl;
+    //for(auto & ac : moveVec){
+    //    std::cout<<ac.debugString()<<std::endl;
+    //}
+    //std::cout<<"************* FIM Generator  **************"<<std::endl;
     
-    std::cout<<"************* INICIO Generator  **************"<<std::endl;
-    for(auto & ac : moveVec){
-        std::cout<<ac.debugString()<<std::endl;
+}
+
+//Verifica qual a unidade válida para inclusão 
+Unit GenerationClass::getEnemyClosestvalid(GameState& state, std::vector<Unit> unidadesInimigas){
+    for(auto & un : unidadesInimigas){
+        if( !state.unitExist(un.player(), un.ID())){
+            return un;
+        }
     }
-    std::cout<<"************* FIM Generator  **************"<<std::endl;
-    
 }
 
 void GenerationClass::getMoves2(GameState& state, const MoveArray& moves, std::vector<Action>& moveVec) {
