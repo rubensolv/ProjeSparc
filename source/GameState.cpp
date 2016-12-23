@@ -1046,7 +1046,7 @@ void GameState::addNeutralUnit(const Unit & unit)
 }
 
 // print the state in a neat way
-void GameState::print(int indent) const
+void GameState::fprint(int indent) const
 {
 	TABS(indent);
 	std::cout << calculateHash(0) << "\n";
@@ -1059,10 +1059,30 @@ void GameState::print(int indent) const
 			const Unit & unit(getUnit(p, u));
 
 			TABS(indent);
-			fprintf(stderr, "  P%d %5d %5d    (%3d, %3d)     %s\n", unit.player(), unit.currentHP(), unit.firstTimeFree(), unit.x(), unit.y(), unit.name().c_str());
+			fprintf(stderr, "  P%d %5d %5d %5d    (%3d, %3d)     %s\n", unit.player(), (int) unit.ID() ,unit.currentHP(), unit.firstTimeFree(), unit.x(), unit.y(), unit.name().c_str());
 		}
 	}
 	fprintf(stderr, "\n\n");
+}
+
+// print the state in a neat way
+void GameState::print(int indent) const
+{
+	TABS(indent);
+	std::cout << calculateHash(0) << "\n";
+	printf( "State - Time: %d\n", _currentTime);
+
+	for (IDType p(0); p<Constants::Num_Players; ++p)
+	{
+		for (UnitCountType u(0); u<_numUnits[p]; ++u)
+		{
+			const Unit & unit(getUnit(p, u));
+
+			TABS(indent);
+			printf("  P%d %5d %5d %5d    (%3d, %3d)     %s\n", unit.player(), (int) unit.ID() ,unit.currentHP(), unit.firstTimeFree(), unit.x(), unit.y(), unit.name().c_str());
+		}
+	}
+	printf("\n\n");
 }
 
 std::string GameState::toString() const

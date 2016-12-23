@@ -350,7 +350,7 @@ const HealthType Unit::healAmount() const
 
 void Unit::print() const 
 { 
-    printf("%s %5d [%5d %5d] (%5d, %5d)\n", _unitType.getName().c_str(), currentHP(), nextAttackActionTime(), nextMoveActionTime(), x(), y()); 
+    printf("%5d %s %5d [%5d %5d] (%5d, %5d)\n",(int) ID(),_unitType.getName().c_str(), currentHP(), nextAttackActionTime(), nextMoveActionTime(), x(), y()); 
 }
 
 void Unit::updateCurrentHP(const HealthType & newHP) 
