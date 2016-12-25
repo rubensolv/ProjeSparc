@@ -40,8 +40,18 @@ void GenerationClass::getMoves(GameState& state, const MoveArray& moves, std::ve
         }
         if(qtdUnPlayerAbstr == newState.numUnits(_playerID)
                 or newState.numUnits(_playerID) == moves.numUnits()){
-            
-            //executa a busca
+            doAlphaBeta(newState, moveVec, state);
+                        
+            copiarStateCleanUnit(state, newState);
+        }
+    }
+    
+}
+
+//função para rodar a abstração que será testada.
+//entrada: Novo GameState com as unidades testadas. Vetor de ações que será retornado. GameState original.
+void GenerationClass::doAlphaBeta(GameState & newState, std::vector<Action> & moveVec, GameState & state){
+    //executa a busca
             alphaBeta->doSearch(newState);
             for(auto & mov : alphaBeta->getResults().bestMoves){
                 if(mov.type() == ActionTypes::ATTACK){
@@ -61,11 +71,6 @@ void GenerationClass::getMoves(GameState& state, const MoveArray& moves, std::ve
                                             mov.pos() ));
                 }    
             }
-                        
-            copiarStateCleanUnit(state, newState);
-        }
-    }
-    
 }
 
 //adicionar uma unidade no vetor de controle de ataque de unidades.

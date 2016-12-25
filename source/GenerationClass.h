@@ -38,6 +38,7 @@ namespace SparCraft {
         const PositionType getDistManhantan(const Position & pInicial, const Position & pFinal);
         const PositionType getDistEuclidiana(const Position & pInicial, const Position & pFinal);
         const bool unitNeedMoreAttackForKilled(Unit & un);
+        void doAlphaBeta(GameState & newState, std::vector<Action> & moveVec, GameState& state);
     };
 }
 
