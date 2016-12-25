@@ -23,7 +23,6 @@ namespace SparCraft {
     public:
         GenerationClass(const IDType & playerID);
         void getMoves(GameState & state, const MoveArray & moves, std::vector<Action> & moveVec);
-        void getMoves2(GameState & state, const MoveArray & moves, std::vector<Action> & moveVec);
         IDType getType() { return PlayerModels::Kiter; }
         void listaOrdenada(const IDType & playerID, const Unit & unidade, GameState & state, std::vector<Unit> & unidades);
         void listaOrdenadaForMoves(const IDType & playerID, const Unit & unidade, GameState & state, std::vector<Unit> & unidades, const MoveArray & moves);
@@ -38,6 +37,7 @@ namespace SparCraft {
         void printMapAttack();
         const PositionType getDistManhantan(const Position & pInicial, const Position & pFinal);
         const PositionType getDistEuclidiana(const Position & pInicial, const Position & pFinal);
+        const bool unitNeedMoreAttackForKilled(Unit & un);
     };
 }
 

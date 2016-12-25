@@ -99,13 +99,13 @@ Player 0 GenerationClass
 
 # Sample SeparatedState States
 State SeparatedState 2 128 128 400 360 840 360 Protoss_Dragoon 12
-#State SeparatedState 10 128 128 400 360 840 360 Zerg_Zergling 50
+#State SeparatedState 10 128 128 400 360 840 360 Zerg_Zergling 12
 #State SeparatedState 10 128 128 400 360 840 360 Protoss_Dragoon 25 Protoss_Zealot 25
 #State SeparatedState 10 128 128 400 360 840 360 Protoss_Dragoon 25 Terran_Marine 25
 #State SeparatedState 10 128 128 400 360 840 360 Terran_Marine 25 Zerg_Zergling 25
 
 # Sample Symmetric State States
-#State StateSymmetric 10 128 128 Protoss_Dragoon 8
+State StateSymmetric 2 128 128 Protoss_Dragoon 8
 #State StateSymmetric 10 128 128 Zerg_Zergling 8
 #State StateSymmetric 10 128 128 Protoss_Dragoon 16 Protoss_Zealot 16
 #State StateSymmetric 10 128 128 Protoss_Dragoon 16 Terran_Marine 16
