@@ -39,6 +39,7 @@ namespace SparCraft {
         const PositionType getDistEuclidiana(const Position & pInicial, const Position & pFinal);
         const bool unitNeedMoreAttackForKilled(Unit & un);
         void doAlphaBeta(GameState & newState, std::vector<Action> & moveVec, GameState& state);
+        void sortUnit(std::vector<Unit> & unidades, const Unit & unit, GameState & state);
     };
 }
 

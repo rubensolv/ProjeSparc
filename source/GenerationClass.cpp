@@ -9,42 +9,72 @@ GenerationClass::GenerationClass(const IDType& playerID) {
 }
 
 void GenerationClass::getMoves(GameState& state, const MoveArray& moves, std::vector<Action>& moveVec) {
-    moveVec.clear();
-    _unAttack.clear();
-    //qtd que controla o quantitativo de unidades na abstração
-    int qtdUnPlayerAbstr = 4;
+    
+    //vetor de controle de abstrações a serem escolhidas
+    std::vector< std::vector<Action> > vecMoves;
     //estado que será utilizado para simular as variações necessárias do AB
     GameState newState;    
-        
-    //obtem nossa unidade inicial.
-    const Unit & ourUnit           (state.getUnit(_playerID,(0)));        
     
     //vetores ordenados por distancia que conterão as unidades
-    std::vector<Unit> unidadesAliadas ;    
+    std::vector<Unit> unidadesAliadas;
     std::vector<Unit> unidadesInimigas;
-    
-    listaOrdenadaForMoves(_playerID, ourUnit, state, unidadesAliadas, moves);
-    //listaOrdenada(state.getEnemy(_playerID), ourUnit, state, unidadesInimigas);
-    
-    copiarStateCleanUnit(state, newState);
-    for(auto & un : unidadesAliadas){
-        //para mudanças na forma de escolha das unidades associadas
-        if(newState.numUnits(_playerID) == 0){
-            listaOrdenada(state.getEnemy(_playerID), un, state, unidadesInimigas);
+        
+    for (int qtdUnPlayerAbstr = 1; qtdUnPlayerAbstr <= moves.numUnits(); ++qtdUnPlayerAbstr) {
+        moveVec.clear();
+        _unAttack.clear();
+        
+        //obtem nossa unidade inicial.
+        const Unit & ourUnit(state.getUnit(_playerID, (0)));
+
+        listaOrdenadaForMoves(_playerID, ourUnit, state, unidadesAliadas, moves);
+        //listaOrdenada(state.getEnemy(_playerID), ourUnit, state, unidadesInimigas);
+
+        int control = 0;
+        for (auto & un : unidadesAliadas) {
+            control++;
+            //para mudanças na forma de escolha das unidades associadas
+            if (newState.numUnits(_playerID) == 0) {
+                listaOrdenada(state.getEnemy(_playerID), un, state, unidadesInimigas);
+            }
+            if (qtdUnPlayerAbstr != newState.numUnits(_playerID)) {
+                //adiciono o número de unidades que desejamos na abstração
+                newState.addUnitWithID(un);
+                //listaOrdenada(state.getEnemy(_playerID), un, state, unidadesInimigas);
+                newState.addUnitWithID(getEnemyClosestvalid(newState, unidadesInimigas));
+            }
+            if (qtdUnPlayerAbstr == newState.numUnits(_playerID)
+                    or unidadesAliadas.size() == control ) {
+                //fim validando
+                doAlphaBeta(newState, moveVec, state);
+                copiarStateCleanUnit(state, newState);
+            }
         }
-        if(qtdUnPlayerAbstr != newState.numUnits(_playerID)){
-            //adiciono o número de unidades que desejamos na abstração
-            newState.addUnitWithID(un);
-            //listaOrdenada(state.getEnemy(_playerID), un, state, unidadesInimigas);
-            newState.addUnitWithID(getEnemyClosestvalid(newState, unidadesInimigas));
-        }
-        if(qtdUnPlayerAbstr == newState.numUnits(_playerID)
-                or newState.numUnits(_playerID) == moves.numUnits()){
-            doAlphaBeta(newState, moveVec, state);
-                        
-            copiarStateCleanUnit(state, newState);
+        vecMoves.push_back(moveVec);
+    }
+    
+    //inicia o processo para escolher qual abstração será utilizada
+    GameState evalGame;
+    ScoreType ltd2max = -999999;
+    std::vector<Action> & moveVecSelected = vecMoves[0];
+    
+    for(auto & mov : vecMoves){
+        evalGame = state;
+        evalGame.makeMoves(mov);
+        //if(ltd2max > evalGame.LTD2(state.getEnemy(_playerID))){  //diminuir o ltd2 do meu adversário
+        //if(ltd2max < evalGame.LTD2_playerID)){  //jogadas que melhorem (aumentem) o meu ltd2
+        if(ltd2max < evalGame.evalLTD2(_playerID)){  //jogadas que melhorem (aumentem) o meu ltd2
+            ltd2max = evalGame.evalLTD2(_playerID);
+            moveVecSelected = mov;
         }
     }
+    moveVec = moveVecSelected;
+    
+    //std::cout<<"##################################################"<<std::endl;
+    //std::cout<<"************* INICIO GenerationClass  **************"<<std::endl;
+    //for(auto & ac : moveVec){
+    //    std::cout<<ac.debugString()<<std::endl;
+    //}
+    //std::cout<<"************* FIM GenerationClass  **************"<<std::endl;
     
 }
 
@@ -62,7 +92,7 @@ void GenerationClass::doAlphaBeta(GameState & newState, std::vector<Action> & mo
                                                 newState.getUnit(state.getEnemy(_playerID), mov.unit()).ID()), 
                                               mov.pos() ));
                     //insere no vetor qual unidade aliada está atacando
-                    addAttack(newState.getUnit(state.getEnemy(_playerID), mov.unit()), newState.getUnit(_playerID, mov.unit()));
+                    //addAttack(newState.getUnit(state.getEnemy(_playerID), mov.unit()), newState.getUnit(_playerID, mov.unit()));
                 }else{
                     moveVec.push_back( Action(state.getIndexUnit(_playerID, newState.getUnit(_playerID, mov.unit()).ID() ),
                                                 mov.player(), 
@@ -138,29 +168,38 @@ void GenerationClass::listaOrdenadaForMoves(const IDType& playerID, const Unit& 
     unidades.clear();
     //declaração
     Unit t;
-    std::map<size_t, Unit> unitsOrder;
-    std::map<size_t, Unit>::iterator myIt;
+    
+    unidades.push_back(unidade);
     
     //obtenho posição atual da unidade base
-    Position currentPos = unidade.currentPosition(state.getTime());
+    //Position currentPos = unidade.currentPosition(state.getTime());
         
     for(IDType u(0); u<moves.numUnits();++u){        
-        t = state.getUnit(playerID,u);        
+        t = state.getUnit(playerID,u);            
         if(!unidade.equalsID( t ) ){
+            unidades.push_back(t);
             //size_t distSq(currentPos.getDistanceSq(t.currentPosition(state.getTime())));
-            size_t distSq(getDistManhantan(currentPos, t.currentPosition(state.getTime())) );
+            //size_t distSq(getDistManhantan(currentPos, t.currentPosition(state.getTime())) );
             //size_t distSq(getDistEuclidiana(currentPos, t.currentPosition(state.getTime())) );
-            unitsOrder[distSq] = t;
         }
     }
-    if(unidade.player() == playerID){
-        unidades.push_back(unidade);
-    }
-    for(myIt = unitsOrder.begin(); myIt != unitsOrder.end(); myIt++){
-        unidades.push_back(myIt->second);
-    }  
+    sortUnit(unidades, unidade, state);
 }
 
+void GenerationClass::sortUnit(std::vector<Unit>& unidades, const Unit& base, GameState & state){
+    for(int i = 1; i < unidades.size(); i++) {
+		Unit key = unidades[i];
+		int j = i - 1;
+		while((j >= 0) && ( getDistEuclidiana(base.currentPosition(state.getTime()),unidades[j].currentPosition(state.getTime()))  
+                                    > getDistEuclidiana(base.currentPosition(state.getTime()), key.currentPosition(state.getTime())))
+                               && ( unidades[j].currentHP() >= key.currentHP())
+                        ) {
+			unidades[j + 1] = unidades[j];
+			j--;
+		}
+		unidades[j + 1] = key;
+	}
+}
 
 /*
  * Retorna todas as unidades de um player ordenados pela distância da unidade
@@ -170,33 +209,20 @@ void GenerationClass::listaOrdenada(const IDType& playerID, const Unit & unidade
     unidades.clear();
     //declaração
     Unit t;
-    std::map<size_t, Unit> unitsOrder;
-    std::map<size_t, Unit>::iterator myIt;
+    
+    if(unidade.player() == playerID){
+        unidades.push_back(unidade);
+    }
     //obtenho posição atual da unidade base
     Position currentPos = unidade.currentPosition(state.getTime());
         
     for(IDType u(0); u<state.numUnits(playerID);++u){        
-        t = state.getUnit(playerID,u);        
+        t = state.getUnit(playerID,u);            
         if(!unidade.equalsID( t ) ){
-            //size_t distSq(currentPos.getDistanceSq(t.currentPosition(state.getTime())));
-            size_t distSq(getDistManhantan(currentPos, t.currentPosition(state.getTime())) );
-            //size_t distSq(getDistEuclidiana(currentPos, t.currentPosition(state.getTime())) );
-            unitsOrder[distSq] = t;
+            unidades.push_back(t);
         }
     }
-    if(unidade.player() == playerID){
-        unidades.push_back(unidade);
-    }
-    //std::cout<<"***************** Distâncias *****************"<<std::endl;
-    //unidade.print();
-    for(myIt = unitsOrder.begin(); myIt != unitsOrder.end(); myIt++){
-        
-        //std::cout<<"Dist: "<<myIt->first<<std::endl;
-        //myIt->second.print();
-        unidades.push_back(myIt->second);
-        
-    }   
-    //std::cout<<"***************** FIM Distâncias *****************"<<std::endl;
+    sortUnit(unidades, unidade, state);
 }
 /*
  * Função tem o objetivo de realizar a cópia do state e já devolver ela 
@@ -230,7 +256,7 @@ void GenerationClass::iniciarAlphaBeta() {
 
     // set the parameters from the options in the file
     params.setMaxPlayer(_playerID);
-    params.setTimeLimit(40);
+    params.setTimeLimit(70);
     params.setMaxChildren(20);
     params.setMoveOrderingMethod(moveOrderingID);
     params.setEvalMethod(evalMethodID);

@@ -46,4 +46,11 @@ void Player_AlphaBeta::getMoves(GameState & state, const MoveArray & moves, std:
     moveVec.clear();
 	alphaBeta->doSearch(state);
     moveVec.assign(alphaBeta->getResults().bestMoves.begin(), alphaBeta->getResults().bestMoves.end());
+    
+    //std::cout<<"##################################################"<<std::endl;
+    //std::cout<<"************* INICIO Al-Beta  **************"<<std::endl;
+    //for(auto & ac : moveVec){
+    //    std::cout<<ac.debugString()<<std::endl;
+    //}
+    //std::cout<<"************* FIM Al-Beta  **************"<<std::endl;
 }
