@@ -92,7 +92,7 @@ void GenerationClass::doAlphaBeta(GameState & newState, std::vector<Action> & mo
                                                 newState.getUnit(state.getEnemy(_playerID), mov.unit()).ID()), 
                                               mov.pos() ));
                     //insere no vetor qual unidade aliada está atacando
-                    //addAttack(newState.getUnit(state.getEnemy(_playerID), mov.unit()), newState.getUnit(_playerID, mov.unit()));
+                    addAttack(newState.getUnit(state.getEnemy(_playerID), mov.unit()), newState.getUnit(_playerID, mov.unit()));
                 }else{
                     moveVec.push_back( Action(state.getIndexUnit(_playerID, newState.getUnit(_playerID, mov.unit()).ID() ),
                                                 mov.player(), 
@@ -190,8 +190,8 @@ void GenerationClass::sortUnit(std::vector<Unit>& unidades, const Unit& base, Ga
     for(int i = 1; i < unidades.size(); i++) {
 		Unit key = unidades[i];
 		int j = i - 1;
-		while((j >= 0) && ( getDistEuclidiana(base.currentPosition(state.getTime()),unidades[j].currentPosition(state.getTime()))  
-                                    > getDistEuclidiana(base.currentPosition(state.getTime()), key.currentPosition(state.getTime())))
+		while((j >= 0) && ( getDistManhantan(base.currentPosition(state.getTime()),unidades[j].currentPosition(state.getTime()))  
+                                    > getDistManhantan(base.currentPosition(state.getTime()), key.currentPosition(state.getTime())))
                                && ( unidades[j].currentHP() >= key.currentHP())
                         ) {
 			unidades[j + 1] = unidades[j];
@@ -302,6 +302,7 @@ const PositionType GenerationClass::getDistEuclidiana(const Position& pInicial, 
 //função utilizada para validar se existe a necessidade de mais um ataque para
 //uma unidade inimiga ou se ela já irá morrer com os ataques existentes.
 const bool GenerationClass::unitNeedMoreAttackForKilled(Unit& un) {
+    
     if( _unAttack.find(un) == _unAttack.end()) {
         return true;
     }
