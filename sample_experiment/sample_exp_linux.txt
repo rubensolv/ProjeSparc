@@ -98,9 +98,9 @@ Player 0 GenerationClass
 #State StateDescriptionFile 10 PATH_TO\sample_state.txt
 
 # Sample SeparatedState States
-State SeparatedState 2 128 128 400 360 840 360 Protoss_Dragoon 10
-#State SeparatedState 4 128 128 400 360 840 360 Zerg_Zergling 20
-#State SeparatedState 4 128 128 400 360 840 360 Protoss_Dragoon 25 Protoss_Zealot 25
+State SeparatedState 2 128 128 400 360 840 360 Protoss_Dragoon 6
+State SeparatedState 2 128 128 400 360 840 360 Zerg_Zergling 8
+State SeparatedState 2 128 128 400 360 840 360 Protoss_Dragoon 6 Protoss_Zealot 6
 #State SeparatedState 4 128 128 400 360 840 360 Protoss_Dragoon 25 Terran_Marine 25
 #State SeparatedState 4 128 128 400 360 840 360 Terran_Marine 25 Zerg_Zergling 25
 

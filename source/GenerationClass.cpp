@@ -54,7 +54,7 @@ void GenerationClass::getMoves(GameState& state, const MoveArray& moves, std::ve
     
     //inicia o processo para escolher qual abstração será utilizada
     GameState evalGame;
-    ScoreType ltd2max = -999999;
+    ScoreType ltd2max = 999999;
     std::vector<Action> & moveVecSelected = vecMoves[0];
     
     for(auto & mov : vecMoves){
@@ -62,7 +62,9 @@ void GenerationClass::getMoves(GameState& state, const MoveArray& moves, std::ve
         evalGame.makeMoves(mov);
         //if(ltd2max > evalGame.LTD2(state.getEnemy(_playerID))){  //diminuir o ltd2 do meu adversário
         //if(ltd2max < evalGame.LTD2_playerID)){  //jogadas que melhorem (aumentem) o meu ltd2
-        if(ltd2max < evalGame.evalLTD2(_playerID)){  //jogadas que melhorem (aumentem) o meu ltd2
+        //if(ltd2max < evalGame.evalLTD2(_playerID)){  //jogadas que melhorem (aumentem) o meu ltd2
+        //if(ltd2max < evalGame.eval(_playerID, PlayerModels::NOKDPS, PlayerModels::KiterDPS).val()){  //avaliação utilizando playout
+        if(ltd2max > evalGame.eval(state.getEnemy(_playerID), PlayerModels::NOKDPS, PlayerModels::KiterDPS).val()){  //avaliação utilizando playout
             ltd2max = evalGame.evalLTD2(_playerID);
             moveVecSelected = mov;
         }
@@ -256,7 +258,7 @@ void GenerationClass::iniciarAlphaBeta() {
 
     // set the parameters from the options in the file
     params.setMaxPlayer(_playerID);
-    params.setTimeLimit(70);
+    params.setTimeLimit(20);
     params.setMaxChildren(20);
     params.setMoveOrderingMethod(moveOrderingID);
     params.setEvalMethod(evalMethodID);
