@@ -9,6 +9,119 @@ GenerationClass::GenerationClass(const IDType& playerID) {
 }
 
 void GenerationClass::getMoves(GameState& state, const MoveArray& moves, std::vector<Action>& moveVec) {
+    cleanUpPrioUnits(state);
+    //estado que será utilizado para simular as variações necessárias do AB
+    GameState newState;
+    //vetores ordenados por distancia que conterão as unidades
+    std::vector<Unit> unidadesAliadas;
+    std::vector<Unit> unidadesInimigas;
+    moveVec.clear();
+    _unAttack.clear();
+
+    //obtem nossa unidade inicial.
+    const Unit & ourUnit(state.getUnit(_playerID, (0)));
+
+    listaOrdenadaForMoves(_playerID, ourUnit, state, unidadesAliadas, moves);
+
+    int qtdUnPlayerAbstr = 4;
+    int control = 0;
+    for (auto & un : unidadesAliadas) {
+        control++;
+        //para mudanças na forma de escolha das unidades associadas
+        if (newState.numUnits(_playerID) == 0) {
+            listaOrdenada(state.getEnemy(_playerID), un, state, unidadesInimigas);
+        }
+        if (qtdUnPlayerAbstr != newState.numUnits(_playerID)) {
+            //adiciono o número de unidades que desejamos na abstração
+            newState.addUnitWithID(un);
+            //listaOrdenada(state.getEnemy(_playerID), un, state, unidadesInimigas);
+        }
+        if (qtdUnPlayerAbstr == newState.numUnits(_playerID)
+                or unidadesAliadas.size() == control) {
+            
+            //newState.addUnitWithID(getEnemyClosestvalid(newState, unidadesInimigas));
+            newState.addUnitWithID(getCalculateEnemy(newState, unidadesInimigas));
+            
+            doAlphaBeta(newState, moveVec, state);
+            copiarStateCleanUnit(state, newState);
+        }
+    }
+    
+    std::cout<<"##################################################"<<std::endl;
+    std::cout<<"************* INICIO GenerationClass  **************"<<std::endl;
+    for(auto & ac : moveVec){
+        std::cout<<ac.debugString()<<std::endl;
+    }
+    std::cout<<"************* FIM GenerationClass  **************"<<std::endl;
+}
+
+//Esta função tem como objetivo definir e escolher a melhor unidade a ser atacada com base na abstração informada
+//Comportamento inicial: Será criada a média da distância Euclidiana de todas as unidades aliadas em relação
+//às unidades inimigas. Será escolhida a unidade inimiga que tiver a menor distância.
+//Será utilizado o vetor _EnUnitPrioAttack como lista de prioridade para as unidades que serão atacadas.
+Unit& GenerationClass::getCalculateEnemy(GameState& state, std::vector<Unit> unidadesInimigas){
+    std::map<Unit, PositionType> unDistance;
+    std::map<Unit, PositionType>::iterator myIt;
+    PositionType sum;
+    //Utilziados na definição da melhor unidade
+    Unit & bestUnit = unidadesInimigas[0];
+    PositionType bestPosition = 999999;
+    
+    //caso o vetor não esteja vazio
+    /*if (!_EnUnitPrioAttack.empty()) {
+        for (auto & un : _EnUnitPrioAttack) {
+            sum = 0;
+            for (int u(0); u < state.numUnits(_playerID); ++u) {
+                sum += getDistEuclidiana(state.getUnit(_playerID, u).position(), un.position());
+            }
+            unDistance[un] = sum / state.numUnits(_playerID);
+
+        }
+        for (myIt = unDistance.begin(); myIt != unDistance.end(); myIt++) {
+            if (myIt->second < bestPosition) {
+                bestPosition = myIt->second;
+                bestUnit = myIt->first;
+            }
+        }
+        int count = 0;
+        for (int u(0); u < state.numUnits(_playerID); ++u) {
+            if(state.getUnit(_playerID, u).canAttackTarget(bestUnit,state.getTime())){
+                ++count;
+            }
+        }
+        if(count > 0){
+            return bestUnit;
+        } 
+        return bestUnit;
+    } */
+    
+    unDistance.clear();
+    //caso o vetor _EnUnitPrioAttack esteja Vazio
+    for(auto & un : unidadesInimigas){
+        sum = 0;
+        for(int u(0);u < state.numUnits(_playerID); ++u){
+            sum += getDistEuclidiana(state.getUnit(_playerID, u).position(), un.position());
+        }
+        unDistance[un] = sum/state.numUnits(_playerID);
+    }
+    
+    
+    for(myIt = unDistance.begin(); myIt != unDistance.end(); myIt++){
+        if(myIt->second < bestPosition){
+           bestPosition = myIt->second;
+           bestUnit = myIt->first;
+        }
+    }
+    std::cout<<"%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% UNidade escolhida %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%"<<std::endl;
+    bestUnit.print();
+    _EnUnitPrioAttack.push_back(bestUnit);
+    return bestUnit;
+    
+}
+
+
+
+void GenerationClass::getMoves2(GameState& state, const MoveArray& moves, std::vector<Action>& moveVec) {
     
     //vetor de controle de abstrações a serem escolhidas
     std::vector< std::vector<Action> > vecMoves;
@@ -86,12 +199,14 @@ void GenerationClass::doAlphaBeta(GameState & newState, std::vector<Action> & mo
     //executa a busca
             alphaBeta->doSearch(newState);
             for(auto & mov : alphaBeta->getResults().bestMoves){
+                
                 if(mov.type() == ActionTypes::ATTACK){
+                    
                     moveVec.push_back( Action( state.getIndexUnit(_playerID, newState.getUnit(_playerID, mov.unit()).ID() ),
                                                 mov.player(), 
                                                 mov.type(), 
                                                 state.getIndexUnit(state.getEnemy(_playerID), 
-                                                newState.getUnit(state.getEnemy(_playerID), mov.unit()).ID()), 
+                                                    newState.getUnit(state.getEnemy(_playerID), mov.index()).ID()), 
                                               mov.pos() ));
                     //insere no vetor qual unidade aliada está atacando
                     addAttack(newState.getUnit(state.getEnemy(_playerID), mov.unit()), newState.getUnit(_playerID, mov.unit()));
@@ -258,7 +373,7 @@ void GenerationClass::iniciarAlphaBeta() {
 
     // set the parameters from the options in the file
     params.setMaxPlayer(_playerID);
-    params.setTimeLimit(20);
+    params.setTimeLimit(60);
     params.setMaxChildren(20);
     params.setMoveOrderingMethod(moveOrderingID);
     params.setEvalMethod(evalMethodID);
@@ -319,6 +434,17 @@ const bool GenerationClass::unitNeedMoreAttackForKilled(Unit& un) {
     return true;
 }
 
+//função que efetua a limpeza do vetor que contém a priorização das unidades
+void GenerationClass::cleanUpPrioUnits(GameState& state){
+    std::vector<Unit> existentes;
+    for(auto & un : _EnUnitPrioAttack){
+        if(state.unitExist(state.getEnemy(_playerID),un.ID())){
+            existentes.push_back(un);
+        }
+    }
+    
+    _EnUnitPrioAttack = existentes;
+}
 
 
 

@@ -20,9 +20,11 @@ namespace SparCraft {
     class GenerationClass : public Player {
         AlphaBetaSearchAbstract * alphaBeta;
         std::map<Unit, std::vector<Unit>> _unAttack;
+        std::vector<Unit> _EnUnitPrioAttack;
     public:
         GenerationClass(const IDType & playerID);
         void getMoves(GameState & state, const MoveArray & moves, std::vector<Action> & moveVec);
+        void getMoves2(GameState & state, const MoveArray & moves, std::vector<Action> & moveVec);
         IDType getType() { return PlayerModels::Kiter; }
         void listaOrdenada(const IDType & playerID, const Unit & unidade, GameState & state, std::vector<Unit> & unidades);
         void listaOrdenadaForMoves(const IDType & playerID, const Unit & unidade, GameState & state, std::vector<Unit> & unidades, const MoveArray & moves);
@@ -40,6 +42,8 @@ namespace SparCraft {
         const bool unitNeedMoreAttackForKilled(Unit & un);
         void doAlphaBeta(GameState & newState, std::vector<Action> & moveVec, GameState& state);
         void sortUnit(std::vector<Unit> & unidades, const Unit & unit, GameState & state);
+        Unit& getCalculateEnemy(GameState & state, std::vector<Unit> unidadesInimigas); 
+        void cleanUpPrioUnits(GameState & state);
     };
 }
 
