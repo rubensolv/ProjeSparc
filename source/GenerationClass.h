@@ -39,7 +39,7 @@ namespace SparCraft {
         void printMapAttack();
         const PositionType getDistManhantan(const Position & pInicial, const Position & pFinal);
         const PositionType getDistEuclidiana(const Position & pInicial, const Position & pFinal);
-        const bool unitNeedMoreAttackForKilled(Unit & un);
+        const bool unitNeedMoreAttackForKilled(Unit un);
         void doAlphaBeta(GameState & newState, std::vector<Action> & moveVec, GameState& state);
         void sortUnit(std::vector<Unit> & unidades, const Unit & unit, GameState & state);
         Unit& getCalculateEnemy(GameState & state, std::vector<Unit> unidadesInimigas); 

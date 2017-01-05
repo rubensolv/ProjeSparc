@@ -25,6 +25,7 @@ void GenerationClass::getMoves(GameState& state, const MoveArray& moves, std::ve
 
     int qtdUnPlayerAbstr = 4;
     int control = 0;
+    
     for (auto & un : unidadesAliadas) {
         control++;
         //para mudanças na forma de escolha das unidades associadas
@@ -47,12 +48,25 @@ void GenerationClass::getMoves(GameState& state, const MoveArray& moves, std::ve
         }
     }
     
-    std::cout<<"##################################################"<<std::endl;
+    //verificando a lista de movimento
+    
+    
+    
+    
+    
+    
+    
+    /*
+     std::cout<<"##################################################"<<std::endl;
     std::cout<<"************* INICIO GenerationClass  **************"<<std::endl;
     for(auto & ac : moveVec){
         std::cout<<ac.debugString()<<std::endl;
     }
     std::cout<<"************* FIM GenerationClass  **************"<<std::endl;
+    
+    printMapAttack()
+    */
+    
 }
 
 //Esta função tem como objetivo definir e escolher a melhor unidade a ser atacada com base na abstração informada
@@ -66,36 +80,10 @@ Unit& GenerationClass::getCalculateEnemy(GameState& state, std::vector<Unit> uni
     //Utilziados na definição da melhor unidade
     Unit & bestUnit = unidadesInimigas[0];
     PositionType bestPosition = 999999;
+    std::cout<<"&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&"<<std::endl;
+    std::cout<<"Unidade mais proxima no vetor:";
+    bestUnit.print();
     
-    //caso o vetor não esteja vazio
-    /*if (!_EnUnitPrioAttack.empty()) {
-        for (auto & un : _EnUnitPrioAttack) {
-            sum = 0;
-            for (int u(0); u < state.numUnits(_playerID); ++u) {
-                sum += getDistEuclidiana(state.getUnit(_playerID, u).position(), un.position());
-            }
-            unDistance[un] = sum / state.numUnits(_playerID);
-
-        }
-        for (myIt = unDistance.begin(); myIt != unDistance.end(); myIt++) {
-            if (myIt->second < bestPosition) {
-                bestPosition = myIt->second;
-                bestUnit = myIt->first;
-            }
-        }
-        int count = 0;
-        for (int u(0); u < state.numUnits(_playerID); ++u) {
-            if(state.getUnit(_playerID, u).canAttackTarget(bestUnit,state.getTime())){
-                ++count;
-            }
-        }
-        if(count > 0){
-            return bestUnit;
-        } 
-        return bestUnit;
-    } */
-    
-    unDistance.clear();
     //caso o vetor _EnUnitPrioAttack esteja Vazio
     for(auto & un : unidadesInimigas){
         sum = 0;
@@ -104,17 +92,34 @@ Unit& GenerationClass::getCalculateEnemy(GameState& state, std::vector<Unit> uni
         }
         unDistance[un] = sum/state.numUnits(_playerID);
     }
-    
-    
+    //seleciono como base de analise a unidade mais próxima
+    std::cout<<"__Listagem de unidades:"<<std::endl;
     for(myIt = unDistance.begin(); myIt != unDistance.end(); myIt++){
+        std::cout<<"Distancia:"<<myIt->second<<"  ";
+        myIt->first.print();
         if(myIt->second < bestPosition){
+            bestPosition = myIt->second;
+            bestUnit = myIt->first;
+        }
+    }
+    
+    std::cout<<"Unidade mais proxima por distancia euclidiana:";
+    bestUnit.print();
+    
+    //aplico outras análises
+    bestPosition = 9999999;
+    for(myIt = unDistance.begin(); myIt != unDistance.end(); myIt++){
+        
+        if(myIt->second < bestPosition
+                and myIt->first.currentHP() < bestUnit.currentHP()
+                and unitNeedMoreAttackForKilled( myIt->first )
+          ){
            bestPosition = myIt->second;
            bestUnit = myIt->first;
         }
     }
-    std::cout<<"%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% UNidade escolhida %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%"<<std::endl;
+    std::cout<<"Unidade mais proxima Escolhida:";
     bestUnit.print();
-    _EnUnitPrioAttack.push_back(bestUnit);
     return bestUnit;
     
 }
@@ -132,7 +137,7 @@ void GenerationClass::getMoves2(GameState& state, const MoveArray& moves, std::v
     std::vector<Unit> unidadesAliadas;
     std::vector<Unit> unidadesInimigas;
         
-    for (int qtdUnPlayerAbstr = 1; qtdUnPlayerAbstr <= moves.numUnits(); ++qtdUnPlayerAbstr) {
+    for (int qtdUnPlayerAbstr = 20; qtdUnPlayerAbstr <= moves.numUnits(); ++qtdUnPlayerAbstr) {
         moveVec.clear();
         _unAttack.clear();
         
@@ -209,7 +214,7 @@ void GenerationClass::doAlphaBeta(GameState & newState, std::vector<Action> & mo
                                                     newState.getUnit(state.getEnemy(_playerID), mov.index()).ID()), 
                                               mov.pos() ));
                     //insere no vetor qual unidade aliada está atacando
-                    addAttack(newState.getUnit(state.getEnemy(_playerID), mov.unit()), newState.getUnit(_playerID, mov.unit()));
+                    addAttack(newState.getUnit(state.getEnemy(_playerID), mov.index()), newState.getUnit(_playerID, mov.unit()));
                 }else{
                     moveVec.push_back( Action(state.getIndexUnit(_playerID, newState.getUnit(_playerID, mov.unit()).ID() ),
                                                 mov.player(), 
@@ -358,7 +363,7 @@ void GenerationClass::iniciarAlphaBeta() {
     
     // convert them to the proper enum types
     int moveOrderingID = 0;
-    int evalMethodID = 2;
+    int evalMethodID = 2;  //testar com 1
     int playoutScriptID1 = 7;
     int playoutScriptID2 = 7;
     int playerToMoveID = 1;
@@ -373,20 +378,20 @@ void GenerationClass::iniciarAlphaBeta() {
 
     // set the parameters from the options in the file
     params.setMaxPlayer(_playerID);
-    params.setTimeLimit(60);
-    params.setMaxChildren(20);
+    params.setTimeLimit(20);
+    params.setMaxChildren(0);
     params.setMoveOrderingMethod(moveOrderingID);
     params.setEvalMethod(evalMethodID);
     params.setSimScripts(playoutScriptID1, playoutScriptID2);
     params.setPlayerToMoveMethod(playerToMoveID);
 
     // add scripts for move ordering
-    if (moveOrderingID == MoveOrderMethod::ScriptFirst) {
-        params.addOrderedMoveScript(PlayerModels::NOKDPS);
-        params.addOrderedMoveScript(PlayerModels::KiterDPS);
+    //if (moveOrderingID == MoveOrderMethod::ScriptFirst) {
+        //params.addOrderedMoveScript(PlayerModels::NOKDPS);
+        //params.addOrderedMoveScript(PlayerModels::KiterDPS);
         //params.addOrderedMoveScript(PlayerModels::Cluster);
         //params.addOrderedMoveScript(PlayerModels::AttackWeakest);
-    }
+    //}
 
     // set opponent modeling if it's not none
     if (opponentModelID != PlayerModels::None) {
@@ -418,8 +423,7 @@ const PositionType GenerationClass::getDistEuclidiana(const Position& pInicial, 
 
 //função utilizada para validar se existe a necessidade de mais um ataque para
 //uma unidade inimiga ou se ela já irá morrer com os ataques existentes.
-const bool GenerationClass::unitNeedMoreAttackForKilled(Unit& un) {
-    
+const bool GenerationClass::unitNeedMoreAttackForKilled(Unit un) {
     if( _unAttack.find(un) == _unAttack.end()) {
         return true;
     }
