@@ -9,7 +9,7 @@ GenerationClass::GenerationClass(const IDType& playerID) {
 }
 
 void GenerationClass::getMoves(GameState& state, const MoveArray& moves, std::vector<Action>& moveVec) {
-    cleanUpPrioUnits(state);
+    state.print();
     //estado que será utilizado para simular as variações necessárias do AB
     GameState newState;
     //vetores ordenados por distancia que conterão as unidades
@@ -32,10 +32,23 @@ void GenerationClass::getMoves(GameState& state, const MoveArray& moves, std::ve
         if (newState.numUnits(_playerID) == 0) {
             listaOrdenada(state.getEnemy(_playerID), un, state, unidadesInimigas);
         }
+        if(!(_UnReut.empty())){
+            std::cout<<"()()()Adicionando unidades para reaproveitamento"<<std::endl;
+            //adiciono as unidades à abstração
+            for(auto & un : _UnReut){
+                newState.addUnitWithID(un);
+                un.print();
+            }
+            _UnReut.clear();
+            std::cout<<"()()()FIM Adicionando unidades para reaproveitamento"<<std::endl;
+        }
         if (qtdUnPlayerAbstr != newState.numUnits(_playerID)) {
             //adiciono o número de unidades que desejamos na abstração
-            newState.addUnitWithID(un);
-            //listaOrdenada(state.getEnemy(_playerID), un, state, unidadesInimigas);
+            if(!newState.unitExist(_playerID, un.ID())){
+                newState.addUnitWithID(un);
+            }
+            
+            
         }
         if (qtdUnPlayerAbstr == newState.numUnits(_playerID)
                 or unidadesAliadas.size() == control) {
@@ -44,35 +57,85 @@ void GenerationClass::getMoves(GameState& state, const MoveArray& moves, std::ve
             newState.addUnitWithID(getCalculateEnemy(newState, unidadesInimigas));
             
             doAlphaBeta(newState, moveVec, state);
+            //função que analisa o moveVec em busca de ataques desnecessários
+            removeLoseAttacks(newState, moveVec, state);
+            
             copiarStateCleanUnit(state, newState);
         }
     }
     
-    //verificando a lista de movimento
     
     
-    
-    
-    
-    
-    
-    /*
      std::cout<<"##################################################"<<std::endl;
     std::cout<<"************* INICIO GenerationClass  **************"<<std::endl;
     for(auto & ac : moveVec){
         std::cout<<ac.debugString()<<std::endl;
     }
     std::cout<<"************* FIM GenerationClass  **************"<<std::endl;
-    
+    std::cout<<"##################################################"<<std::endl;
+    /*
     printMapAttack()
     */
     
 }
 
+
+//função que analisa os movimentos sugeridos pelo AB e busca encontrar ataques perdidos
+//funciona apenas com 1 unidade inimiga
+void GenerationClass::removeLoseAttacks(GameState& newState, std::vector<Action>& moveVec, GameState & state){
+    _UnReut.clear();
+    Unit unAval;
+    
+    std::cout<<"************* INICIO Analise de atacks perdidos  **************"<<std::endl;
+    
+    //obtenho unidade que está sendo atacada  -- indice zero pois iremos obter a unica unidade inimiga na abstração.
+    Unit & enemy = newState.getUnit(newState.getEnemy(_playerID), 0);
+    std::cout<<"Unidadade inimiga= "; enemy.print();
+    
+    HealthType enemyHP =  enemy.currentHP();
+    
+    for(auto & mov : moveVec){
+        if(mov.type() == ActionTypes::ATTACK
+            and enemy.ID() == state.getUnit(newState.getEnemy(_playerID), mov.index()).ID() 
+                ){
+            std::cout<<"-- HP analisado= "<< enemyHP<< std::endl;
+            //busco verificar se a unidade que foi atacada conseguiu ser eliminada sem necessitar de todas as ações do vetor
+            std::cout<<"-- Movimento de ataque= "<< mov.debugString()<< std::endl;
+            //obtenho a unidade relacionada ao movimento
+            unAval = state.getUnit(_playerID, mov.unit()); 
+            if(enemyHP >= 0 ){
+                enemyHP = enemyHP - unAval.getDamageTo(enemy);
+            }else{
+                std::cout<<"--- Ação considerada desnecessária. HP Atual= "<<enemyHP <<" "<< std::endl;
+                //caso o Hp seja zero, esta será uma ação perdida. Removo do vetor.
+                removeActionInVector(mov,moveVec);
+                //adiciono a unidade aliada para nova abstração
+                _UnReut.push_back(unAval);
+            }
+        }
+    }
+    
+    
+    std::cout<<"************* FIM Analise de atacks perdidos  **************"<<std::endl;
+}
+
+
+//função utilizada para remoção das ações de dentro do vetor moveVec
+void GenerationClass::removeActionInVector(Action& action, std::vector<Action>& moveVec){
+    std::vector<Action> newMoveVec;
+    for(auto & mov : moveVec){
+        if(!(mov == action)){
+            newMoveVec.push_back(mov);
+        }
+    }
+    moveVec = newMoveVec;
+}
+
+
+
 //Esta função tem como objetivo definir e escolher a melhor unidade a ser atacada com base na abstração informada
 //Comportamento inicial: Será criada a média da distância Euclidiana de todas as unidades aliadas em relação
 //às unidades inimigas. Será escolhida a unidade inimiga que tiver a menor distância.
-//Será utilizado o vetor _EnUnitPrioAttack como lista de prioridade para as unidades que serão atacadas.
 Unit& GenerationClass::getCalculateEnemy(GameState& state, std::vector<Unit> unidadesInimigas){
     std::map<Unit, PositionType> unDistance;
     std::map<Unit, PositionType>::iterator myIt;
@@ -80,11 +143,11 @@ Unit& GenerationClass::getCalculateEnemy(GameState& state, std::vector<Unit> uni
     //Utilziados na definição da melhor unidade
     Unit & bestUnit = unidadesInimigas[0];
     PositionType bestPosition = 999999;
-    std::cout<<"&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&"<<std::endl;
-    std::cout<<"Unidade mais proxima no vetor:";
-    bestUnit.print();
+    //std::cout<<"&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&"<<std::endl;
+    //std::cout<<"Unidade mais proxima no vetor:";
+    //bestUnit.print();
     
-    //caso o vetor _EnUnitPrioAttack esteja Vazio
+    
     for(auto & un : unidadesInimigas){
         sum = 0;
         for(int u(0);u < state.numUnits(_playerID); ++u){
@@ -93,18 +156,18 @@ Unit& GenerationClass::getCalculateEnemy(GameState& state, std::vector<Unit> uni
         unDistance[un] = sum/state.numUnits(_playerID);
     }
     //seleciono como base de analise a unidade mais próxima
-    std::cout<<"__Listagem de unidades:"<<std::endl;
+    //std::cout<<"__Listagem de unidades:"<<std::endl;
     for(myIt = unDistance.begin(); myIt != unDistance.end(); myIt++){
-        std::cout<<"Distancia:"<<myIt->second<<"  ";
-        myIt->first.print();
+        //std::cout<<"Distancia:"<<myIt->second<<"  ";
+        //myIt->first.print();
         if(myIt->second < bestPosition){
             bestPosition = myIt->second;
             bestUnit = myIt->first;
         }
     }
     
-    std::cout<<"Unidade mais proxima por distancia euclidiana:";
-    bestUnit.print();
+    //std::cout<<"Unidade mais proxima por distancia euclidiana:";
+    //bestUnit.print();
     
     //aplico outras análises
     bestPosition = 9999999;
@@ -118,8 +181,8 @@ Unit& GenerationClass::getCalculateEnemy(GameState& state, std::vector<Unit> uni
            bestUnit = myIt->first;
         }
     }
-    std::cout<<"Unidade mais proxima Escolhida:";
-    bestUnit.print();
+    //std::cout<<"Unidade mais proxima Escolhida:";
+    //bestUnit.print();
     return bestUnit;
     
 }
@@ -436,18 +499,6 @@ const bool GenerationClass::unitNeedMoreAttackForKilled(Unit un) {
     }
     
     return true;
-}
-
-//função que efetua a limpeza do vetor que contém a priorização das unidades
-void GenerationClass::cleanUpPrioUnits(GameState& state){
-    std::vector<Unit> existentes;
-    for(auto & un : _EnUnitPrioAttack){
-        if(state.unitExist(state.getEnemy(_playerID),un.ID())){
-            existentes.push_back(un);
-        }
-    }
-    
-    _EnUnitPrioAttack = existentes;
 }
 
 

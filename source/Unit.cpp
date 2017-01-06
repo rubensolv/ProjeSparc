@@ -173,6 +173,22 @@ void Unit::takeAttack(const Unit & attacker)
     updateCurrentHP(_currentHP - damage);
 }
 
+const HealthType Unit::getDamageTo(const Unit & unit) const{
+    PlayerWeapon    weapon(getWeapon(unit));
+    HealthType      damage(weapon.GetDamageBase());
+
+    // calculate the damage based on armor and damage types
+    damage = std::max((int)((damage-getArmor()) * weapon.GetDamageMultiplier(getSize())), 2);
+    
+    // special case where units attack multiple times
+    if (type() == BWAPI::UnitTypes::Protoss_Zealot || type() == BWAPI::UnitTypes::Terran_Firebat)
+    {
+        damage *= 2;
+    }
+    return damage;
+}
+
+
 void Unit::takeHeal(const Unit & healer)
 {
     updateCurrentHP(_currentHP + healer.healAmount());
