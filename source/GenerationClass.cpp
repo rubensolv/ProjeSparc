@@ -9,7 +9,6 @@ GenerationClass::GenerationClass(const IDType& playerID) {
 }
 
 void GenerationClass::getMoves(GameState& state, const MoveArray& moves, std::vector<Action>& moveVec) {
-    state.print();
     //estado que será utilizado para simular as variações necessárias do AB
     GameState newState;
     //vetores ordenados por distancia que conterão as unidades
@@ -33,22 +32,17 @@ void GenerationClass::getMoves(GameState& state, const MoveArray& moves, std::ve
             listaOrdenada(state.getEnemy(_playerID), un, state, unidadesInimigas);
         }
         if(!(_UnReut.empty())){
-            std::cout<<"()()()Adicionando unidades para reaproveitamento"<<std::endl;
             //adiciono as unidades à abstração
             for(auto & un : _UnReut){
                 newState.addUnitWithID(un);
-                un.print();
             }
             _UnReut.clear();
-            std::cout<<"()()()FIM Adicionando unidades para reaproveitamento"<<std::endl;
         }
         if (qtdUnPlayerAbstr != newState.numUnits(_playerID)) {
             //adiciono o número de unidades que desejamos na abstração
             if(!newState.unitExist(_playerID, un.ID())){
                 newState.addUnitWithID(un);
             }
-            
-            
         }
         if (qtdUnPlayerAbstr == newState.numUnits(_playerID)
                 or unidadesAliadas.size() == control) {
@@ -56,7 +50,7 @@ void GenerationClass::getMoves(GameState& state, const MoveArray& moves, std::ve
             //newState.addUnitWithID(getEnemyClosestvalid(newState, unidadesInimigas));
             newState.addUnitWithID(getCalculateEnemy(newState, unidadesInimigas));
             
-            doAlphaBeta(newState, moveVec, state);
+            doAlphaBeta(newState, moveVec, state);            
             //função que analisa o moveVec em busca de ataques desnecessários
             removeLoseAttacks(newState, moveVec, state);
             
@@ -64,8 +58,23 @@ void GenerationClass::getMoves(GameState& state, const MoveArray& moves, std::ve
         }
     }
     
+    while(!(_UnReut.empty())){
+        for(auto & un : _UnReut){
+            newState.addUnitWithID(un);
+        }
+        
+        listaOrdenada(state.getEnemy(_playerID), _UnReut[0], state, unidadesInimigas);
+        newState.addUnitWithID(getCalculateEnemy(newState, unidadesInimigas));
+        
+        doAlphaBeta(newState, moveVec, state);
+        //função que analisa o moveVec em busca de ataques desnecessários
+        removeLoseAttacks(newState, moveVec, state);
+           
+        copiarStateCleanUnit(state, newState);
+    }
     
     
+    /*
      std::cout<<"##################################################"<<std::endl;
     std::cout<<"************* INICIO GenerationClass  **************"<<std::endl;
     for(auto & ac : moveVec){
@@ -73,7 +82,7 @@ void GenerationClass::getMoves(GameState& state, const MoveArray& moves, std::ve
     }
     std::cout<<"************* FIM GenerationClass  **************"<<std::endl;
     std::cout<<"##################################################"<<std::endl;
-    /*
+    
     printMapAttack()
     */
     
@@ -86,11 +95,11 @@ void GenerationClass::removeLoseAttacks(GameState& newState, std::vector<Action>
     _UnReut.clear();
     Unit unAval;
     
-    std::cout<<"************* INICIO Analise de atacks perdidos  **************"<<std::endl;
+    //std::cout<<"************* INICIO Analise de atacks perdidos  **************"<<std::endl;
     
     //obtenho unidade que está sendo atacada  -- indice zero pois iremos obter a unica unidade inimiga na abstração.
     Unit & enemy = newState.getUnit(newState.getEnemy(_playerID), 0);
-    std::cout<<"Unidadade inimiga= "; enemy.print();
+    //std::cout<<"Unidadade inimiga= "; enemy.print();
     
     HealthType enemyHP =  enemy.currentHP();
     
@@ -98,17 +107,19 @@ void GenerationClass::removeLoseAttacks(GameState& newState, std::vector<Action>
         if(mov.type() == ActionTypes::ATTACK
             and enemy.ID() == state.getUnit(newState.getEnemy(_playerID), mov.index()).ID() 
                 ){
-            std::cout<<"-- HP analisado= "<< enemyHP<< std::endl;
+            //std::cout<<"-- HP analisado= "<< enemyHP<< std::endl;
             //busco verificar se a unidade que foi atacada conseguiu ser eliminada sem necessitar de todas as ações do vetor
-            std::cout<<"-- Movimento de ataque= "<< mov.debugString()<< std::endl;
+            //std::cout<<"-- Movimento de ataque= "<< mov.debugString()<< std::endl;
             //obtenho a unidade relacionada ao movimento
             unAval = state.getUnit(_playerID, mov.unit()); 
             if(enemyHP >= 0 ){
                 enemyHP = enemyHP - unAval.getDamageTo(enemy);
             }else{
-                std::cout<<"--- Ação considerada desnecessária. HP Atual= "<<enemyHP <<" "<< std::endl;
+                //std::cout<<"--- Ação considerada desnecessária. HP Atual= "<<enemyHP <<" "<< std::endl;
                 //caso o Hp seja zero, esta será uma ação perdida. Removo do vetor.
                 removeActionInVector(mov,moveVec);
+                //removo do vetor _unAttack a unidade que não mais efetua ataques
+                removeAttackInUnAttack(enemy, unAval);
                 //adiciono a unidade aliada para nova abstração
                 _UnReut.push_back(unAval);
             }
@@ -116,7 +127,7 @@ void GenerationClass::removeLoseAttacks(GameState& newState, std::vector<Action>
     }
     
     
-    std::cout<<"************* FIM Analise de atacks perdidos  **************"<<std::endl;
+    //std::cout<<"************* FIM Analise de atacks perdidos  **************"<<std::endl;
 }
 
 
@@ -404,7 +415,9 @@ void GenerationClass::listaOrdenada(const IDType& playerID, const Unit & unidade
     for(IDType u(0); u<state.numUnits(playerID);++u){        
         t = state.getUnit(playerID,u);            
         if(!unidade.equalsID( t ) ){
-            unidades.push_back(t);
+            if(unitNeedMoreAttackForKilled(t)){
+                unidades.push_back(t);
+            }
         }
     }
     sortUnit(unidades, unidade, state);
@@ -441,7 +454,7 @@ void GenerationClass::iniciarAlphaBeta() {
 
     // set the parameters from the options in the file
     params.setMaxPlayer(_playerID);
-    params.setTimeLimit(20);
+    params.setTimeLimit(30);
     params.setMaxChildren(0);
     params.setMoveOrderingMethod(moveOrderingID);
     params.setEvalMethod(evalMethodID);
@@ -492,7 +505,7 @@ const bool GenerationClass::unitNeedMoreAttackForKilled(Unit un) {
     }
     HealthType HpAtual = un.currentHP();
     for(auto & unAttack : _unAttack.find(un)->second){
-        HpAtual -= unAttack.damage();
+        HpAtual = HpAtual - unAttack.getDamageTo(un);
         if(HpAtual <= 0){
             return false;
         }
@@ -501,7 +514,16 @@ const bool GenerationClass::unitNeedMoreAttackForKilled(Unit un) {
     return true;
 }
 
-
+//utilizada para remover um ataque da lista de atacantes de um determinado inimigo
+void GenerationClass::removeAttackInUnAttack(Unit enemy, Unit Attacker){
+    std::vector<Unit> cleanUnit;
+    for(auto & unAttack : _unAttack.find(enemy)->second){
+        if( ! (unAttack.ID() == Attacker.ID()) ){
+            cleanUnit.push_back(unAttack);
+        }
+    }
+    _unAttack.find(enemy)->second = cleanUnit;
+}
 
 
 

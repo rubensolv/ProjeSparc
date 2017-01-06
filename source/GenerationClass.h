@@ -28,7 +28,6 @@ namespace SparCraft {
         IDType getType() { return PlayerModels::Kiter; }
         void listaOrdenada(const IDType & playerID, const Unit & unidade, GameState & state, std::vector<Unit> & unidades);
         void listaOrdenadaForMoves(const IDType & playerID, const Unit & unidade, GameState & state, std::vector<Unit> & unidades, const MoveArray & moves);
-        //void aplicarAbstracao(GameState & origState);
         void copiarStateCleanUnit(GameState & origState, GameState & copState);
         void iniciarAlphaBeta();
     private:        
@@ -45,6 +44,7 @@ namespace SparCraft {
         Unit& getCalculateEnemy(GameState & state, std::vector<Unit> unidadesInimigas); 
         void removeLoseAttacks(GameState & newState, std::vector<Action> & moveVec, GameState & state);
         void removeActionInVector(Action & action, std::vector<Action>& moveVec);
+        void removeAttackInUnAttack(Unit enemy, Unit Attacker);
     };
 }
 
