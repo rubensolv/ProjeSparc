@@ -536,3 +536,7 @@ void AlphaBetaSearchAbstract::printTTResults() const
 	printf("         No Move       %9d\n", (int)_results.ttFoundButNoMove);
 	printf("\n");
 }
+
+void AlphaBetaSearchAbstract::setLimitTime(size_t timeLimit){
+    _params.setTimeLimit(timeLimit);
+}

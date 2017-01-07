@@ -76,5 +76,6 @@ public:
 
 	void printTTResults() const;
         void setTranspositionTable();
+        void setLimitTime(size_t timeLimit);
 };
 }

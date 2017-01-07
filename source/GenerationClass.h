@@ -31,7 +31,6 @@ namespace SparCraft {
         void copiarStateCleanUnit(GameState & origState, GameState & copState);
         void iniciarAlphaBeta();
     private:        
-        std::vector<Unit> retornaQtdUnidadesMaisProximas(const IDType & playerId, const Unit & unitRef, GameState & state, int qtdUnidades);
         Unit getEnemyClosestvalid(GameState & state, std::vector<Unit> unidadesInimigas);
         //manipulação do controle de atacantes
         void addAttack(const Unit & unitEnemy,  const Unit & unitAttack);
@@ -45,6 +44,13 @@ namespace SparCraft {
         void removeLoseAttacks(GameState & newState, std::vector<Action> & moveVec, GameState & state);
         void removeActionInVector(Action & action, std::vector<Action>& moveVec);
         void removeAttackInUnAttack(Unit enemy, Unit Attacker);
+        
+        //idéia da movimentação por inicialiaçao
+        bool applyClosestInicialization(std::vector<Unit> & unAliadas, std::vector<Unit> & unInimigas, GameState & state);
+        
+        
+        //ideia de analisar as ações dada à uma unidade
+        void analisarAbstractForm(GameState newState, std::vector<Unit> unidadesInimigas);
     };
 }
 
