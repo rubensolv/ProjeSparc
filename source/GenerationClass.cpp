@@ -92,22 +92,28 @@ void GenerationClass::getMoves(GameState& state, const MoveArray& moves, std::ve
                 copiarStateCleanUnit(state, newState);
             }
         }
-
-        while (!(_UnReut.empty())) {
+        
+        listaOrdenada(state.getEnemy(_playerID), ourUnit, state, unidadesInimigas);
+        while (!(_UnReut.empty())
+                and unidadesInimigas.size() > 0) {
             for (auto & un : _UnReut) {
                 if (!newState.unitExist(_playerID, un.ID())) {
                     newState.addUnitWithID(un);
                 }
             }
-
-            listaOrdenada(state.getEnemy(_playerID), _UnReut[0], state, unidadesInimigas);
+            _UnReut.clear();
+           
             newState.addUnitWithID(getCalculateEnemy(newState, unidadesInimigas));
-
+            
             doAlphaBeta(newState, moveVec, state);
+            
             //função que analisa o moveVec em busca de ataques desnecessários
-            removeLoseAttacks(newState, moveVec, state);
+            if(state.numUnits(state.getEnemy(_playerID)) > 1){
+                removeLoseAttacks(newState, moveVec, state);
+            }
 
             copiarStateCleanUnit(state, newState);
+            listaOrdenada(state.getEnemy(_playerID), _UnReut[0], state, unidadesInimigas);
         }
     }
     
@@ -132,7 +138,7 @@ void GenerationClass::analisarAbstractForm(GameState newState, std::vector<Unit>
     
     //obtenho as unidades aliadas contidas no estado
     std::vector<Unit> unAlly;
-    listaOrdenada(_playerID,enemy, newState, unAlly);
+    
     
     for(auto & un : unAlly){
     
@@ -232,6 +238,7 @@ Unit& GenerationClass::getCalculateEnemy(GameState& state, std::vector<Unit> uni
     Unit & bestUnit = unidadesInimigas[0];
     PositionType bestPosition = 999999;
     //std::cout<<"&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&"<<std::endl;
+    //std::cout<<"Tamanho do vetor:"<< unidadesInimigas.size() <<std::endl;
     //std::cout<<"Unidade mais proxima no vetor:";
     //bestUnit.print();
     
@@ -473,10 +480,11 @@ void GenerationClass::listaOrdenada(const IDType& playerID, const Unit & unidade
     unidades.clear();
     //declaração
     Unit t;
-    
-    if(unidade.player() == playerID){
-        unidades.push_back(unidade);
-    }
+  
+    //if(unidade.player() == playerID){
+    //    unidades.push_back(unidade);
+    //}
+  
     //obtenho posição atual da unidade base
     Position currentPos = unidade.currentPosition(state.getTime());
         
