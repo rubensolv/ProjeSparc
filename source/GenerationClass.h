@@ -45,6 +45,9 @@ namespace SparCraft {
         void removeActionInVector(Action & action, std::vector<Action>& moveVec);
         void removeAttackInUnAttack(Unit enemy, Unit Attacker);
         
+        //idéia da análise de inclusão de outras unidades inimigas que podem ser atacadas
+        void addMoreEnemy(GameState & newState, std::vector<Unit> & unInimigas);
+        
         //idéia da movimentação por inicialiaçao
         bool applyClosestInicialization(std::vector<Unit> & unAliadas, std::vector<Unit> & unInimigas, GameState & state);
         

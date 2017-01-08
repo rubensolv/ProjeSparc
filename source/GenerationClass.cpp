@@ -82,6 +82,9 @@ void GenerationClass::getMoves(GameState& state, const MoveArray& moves, std::ve
                 //newState.addUnitWithID(getEnemyClosestvalid(newState, unidadesInimigas));
                 newState.addUnitWithID(getCalculateEnemy(newState, unidadesInimigas));
 
+                //análise de inclusão de outras unidades inimigas na abstração
+                addMoreEnemy(newState,unidadesInimigas);
+                
                 //análise pós abstract
                 //analisarAbstractForm(newState, unidadesInimigas);
 
@@ -146,6 +149,36 @@ void GenerationClass::analisarAbstractForm(GameState newState, std::vector<Unit>
     
     
 }
+
+/*
+ *  Função que consiste do processo de analisar se exitem outras unidades inimigas que podem
+ * ser atacadas pelas unidades contidas na abstração e adicionar estas unidades inimigas ao estado.
+ */
+void GenerationClass::addMoreEnemy(GameState& newState, std::vector<Unit>& unInimigas) {
+    if (unInimigas.size() > 0) {
+        //obter unidades aliadas da abstração
+        std::vector<Unit> unAl;
+        for (int u(0); u < newState.numUnits(_playerID); ++u) {
+            unAl.push_back(newState.getUnit(_playerID, u));
+        }
+
+        //verificar se existe no vetor alguma outra unidade inimiga que pode ser inserida.
+        for (auto & unIn : unInimigas) {
+            if (!newState.unitExist(newState.getEnemy(_playerID), unIn.ID())) {
+                //verifico se as unidades amigas podem atacar
+                for (auto & uAmiga : unAl) {
+                    if (uAmiga.canAttackTarget(unIn, newState.getTime())) {
+                        if (!newState.unitExist(newState.getEnemy(_playerID), unIn.ID())) {
+                            newState.addUnitWithID(unIn);
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+
 
 /*Função que analisa as unidades aliadas e as unidades inimigas indicando se existe alguma unidade aliada capaz de 
  * atacar alguma unidade aliada.
