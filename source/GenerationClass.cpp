@@ -552,7 +552,7 @@ void GenerationClass::iniciarAlphaBeta() {
     int playoutScriptID1 = 7;
     int playoutScriptID2 = 7;
     int playerToMoveID = 1;
-    int opponentModelID = 12;
+    int opponentModelID = 7; //ultima opção oponente model script
 
     // construct the parameter object
     AlphaBetaSearchParameters params;

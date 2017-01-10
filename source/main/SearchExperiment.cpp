@@ -525,7 +525,7 @@ void SearchExperiment::addPlayer(const std::string & line)
         iss >> playoutScript2;
         iss >> playerToMoveMethod;
         iss >> opponentModelScript;
-
+        
         // convert them to the proper enum types
         int moveOrderingID      = MoveOrderMethod::getID(moveOrdering);
         int evalMethodID        = EvaluationMethods::getID(evalMethod);
