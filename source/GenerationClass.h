@@ -7,23 +7,28 @@
  * Created on 19 de Novembro de 2016, 14:35
  */
 
-
+#include <stdlib.h>
 #include "Player.h"
 #include "AlphaBetaSearchParameters.hpp"
 #include "AlphaBetaSearchAbstract.h"
+#include "PortfolioGreedySearch.h"
 
 class TranspositionTable;
 
 namespace SparCraft {
     class AlphaBetaSearchAbstract;
+    class PortfolioGreedySearch;
     
     class GenerationClass : public Player {
         AlphaBetaSearchAbstract * alphaBeta;
+        PortfolioGreedySearch * pgs;
         std::map<Unit, std::vector<Unit>> _unAttack;
         std::vector<Unit> _UnReut;
+        std::set<Unit> _unitAbsAB;
     public:
         GenerationClass(const IDType & playerID);
         void getMoves(GameState & state, const MoveArray & moves, std::vector<Action> & moveVec);
+        void getMoves3(GameState & state, const MoveArray & moves, std::vector<Action> & moveVec);
         void getMoves2(GameState & state, const MoveArray & moves, std::vector<Action> & moveVec);
         IDType getType() { return PlayerModels::Kiter; }
         void listaOrdenada(const IDType & playerID, const Unit & unidade, GameState & state, std::vector<Unit> & unidades);
@@ -44,6 +49,8 @@ namespace SparCraft {
         void removeLoseAttacks(GameState & newState, std::vector<Action> & moveVec, GameState & state);
         void removeActionInVector(Action & action, std::vector<Action>& moveVec);
         void removeAttackInUnAttack(Unit enemy, Unit Attacker);
+        void controlUnitsForAB(GameState & state, const MoveArray & moves);
+        bool unitsInMoves(GameState& state, const MoveArray& moves);
         
         //idéia da análise de inclusão de outras unidades inimigas que podem ser atacadas
         void addMoreEnemy(GameState & newState, std::vector<Unit> & unInimigas);

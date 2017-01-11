@@ -6,9 +6,96 @@ using namespace SparCraft;
 GenerationClass::GenerationClass(const IDType& playerID) {
     _playerID = playerID;
     iniciarAlphaBeta();
+    pgs = new PortfolioGreedySearch(_playerID, PlayerModels::NOKDPS, 1, 0, 0);
 }
 
 void GenerationClass::getMoves(GameState& state, const MoveArray& moves, std::vector<Action>& moveVec) {
+    moveVec.clear();
+    state.print();
+     UnitScriptData currentScriptData;
+    //obtenho os movimentos sugeridos pelo PGS
+    currentScriptData = pgs->searchForScripts(_playerID, state);
+    
+    controlUnitsForAB(state, moves);
+    
+    std::cout<<"UNidades selecionadas para controle"<<std::endl;
+    for(auto & un : _unitAbsAB){
+        un.print();
+    }
+    
+    if(unitsInMoves(state, moves)){
+        //Executo o AB
+        alphaBeta->doSearchWithMoves(state, currentScriptData, _unitAbsAB);
+        moveVec.assign(alphaBeta->getResults().bestMoves.begin(), alphaBeta->getResults().bestMoves.end());
+    }else{
+        MoveArray movesPGS;
+        std::vector<Action> moveVecPgs;
+        state.generateMoves(movesPGS, _playerID);
+        GameState copy(state);
+        currentScriptData.calculateMoves(_playerID, movesPGS, copy, moveVecPgs);
+        moveVec = moveVecPgs;
+    }
+    
+    std::cout<<"************* INICIO GenerationClass  **************"<<std::endl;
+    for(auto & ac : moveVec){
+        std::cout<<ac.debugString()<<std::endl;
+    }
+    std::cout<<"************* FIM GenerationClass  **************"<<std::endl;
+    std::cout<<"##################################################"<<std::endl;
+    
+    MoveArray movesPGS;
+    state.generateMoves(movesPGS, _playerID);
+    std::vector<Action> moveVecPgs;
+    GameState copy(state);
+    currentScriptData.calculateMoves(_playerID, movesPGS, copy, moveVecPgs);
+    std::cout<<"************* INICIO GenerationClass PGS **************"<<std::endl;
+    for(auto & ac : moveVecPgs){
+        std::cout<<ac.debugString()<<std::endl;
+    }
+    std::cout<<"************* FIM GenerationClass PGS **************"<<std::endl;
+    std::cout<<"##################################################"<<std::endl;
+        
+}
+
+bool GenerationClass::unitsInMoves(GameState& state, const MoveArray& moves){
+    
+     for (size_t unitIndex(0); unitIndex < moves.numUnits(); ++unitIndex){
+        const Unit & unit = state.getUnit(_playerID, unitIndex);
+        if(_unitAbsAB.find(unit) != _unitAbsAB.end()){
+            return true;
+        }
+    }
+    
+    return false;
+}
+
+//separo as unidades que serão utilizadas para compor a abstração que será utilizada no AB
+//e faço controle e manutenção destas
+void GenerationClass::controlUnitsForAB(GameState & state, const MoveArray & moves){
+    //verifico se as unidades não foram mortas
+    for(auto & un : _unitAbsAB){
+        if(!(state.unitExist(_playerID,un.ID()))){
+            _unitAbsAB.erase(un);
+        }
+    }
+    
+    if(!(_unitAbsAB.size() == 2)){
+        if((state.numUnits(_playerID) == 1 or moves.numUnits() == 1)
+                and _unitAbsAB.size() == 0  ){
+            _unitAbsAB.insert(state.getUnit(_playerID,0));
+        }else{
+        //pego qualquer unidade utilizando o rand
+            while(_unitAbsAB.size()<2){
+                _unitAbsAB.insert(state.getUnit(_playerID, rand()% moves.numUnits()));
+            }
+        }
+    }
+    
+    
+    
+}
+
+void GenerationClass::getMoves3(GameState& state, const MoveArray& moves, std::vector<Action>& moveVec) {
     //estado que será utilizado para simular as variações necessárias do AB
     GameState newState;
     //vetores ordenados por distancia que conterão as unidades
@@ -563,8 +650,8 @@ void GenerationClass::iniciarAlphaBeta() {
 
     // set the parameters from the options in the file
     params.setMaxPlayer(_playerID);
-    params.setTimeLimit(20);
-    params.setMaxChildren(20);
+    params.setTimeLimit(40);
+    params.setMaxChildren(0);
     params.setMoveOrderingMethod(moveOrderingID);
     params.setEvalMethod(evalMethodID);
     params.setSimScripts(playoutScriptID1, playoutScriptID2);

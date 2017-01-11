@@ -14,6 +14,54 @@ PortfolioGreedySearch::PortfolioGreedySearch(const IDType & player, const IDType
 	_playerScriptPortfolio.push_back(PlayerModels::KiterDPS);
 }
 
+UnitScriptData PortfolioGreedySearch::searchForScripts(const IDType & player, const GameState & state)
+{
+    Timer t;
+    t.start();
+
+    const IDType enemyPlayer(state.getEnemy(player));
+
+    // calculate the seed scripts for each player
+    // they will be used to seed the initial root search
+    IDType seedScript = calculateInitialSeed(player, state);
+    IDType enemySeedScript = calculateInitialSeed(enemyPlayer, state);
+
+    // set up the root script data
+    UnitScriptData originalScriptData;
+    setAllScripts(player, state, originalScriptData, seedScript);
+    setAllScripts(enemyPlayer, state, originalScriptData, enemySeedScript);
+
+    double ms = t.getElapsedTimeInMilliSec();
+    //printf("\nFirst Part %lf ms\n", ms);
+
+    // do the initial root portfolio search for our player
+    UnitScriptData currentScriptData(originalScriptData);
+    doPortfolioSearch(player, state, currentScriptData);
+
+    // iterate as many times as required
+    for (size_t i(0); i<_responses; ++i)
+    {
+        // do the portfolio search to improve the enemy's scripts
+        doPortfolioSearch(enemyPlayer, state, currentScriptData);
+
+        // then do portfolio search again for us to improve vs. enemy's update
+        doPortfolioSearch(player, state, currentScriptData);
+    }
+
+    // convert the script vector into a move vector and return it
+	//MoveArray moves;
+	//state.generateMoves(moves, player);
+    //std::vector<Action> moveVec;
+    //GameState copy(state);
+    //currentScriptData.calculateMoves(player, moves, copy, moveVec);
+    
+    _totalEvals = 0;
+    ms = t.getElapsedTimeInMilliSec();
+    printf("\nFirst Part %lf ms\n", ms);
+    return currentScriptData;
+}
+
+
 std::vector<Action> PortfolioGreedySearch::search(const IDType & player, const GameState & state)
 {
     Timer t;

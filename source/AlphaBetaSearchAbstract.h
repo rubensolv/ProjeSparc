@@ -14,6 +14,7 @@
 #include "AlphaBetaSearchResults.hpp"
 #include "AlphaBetaSearchParameters.hpp"
 #include "GraphViz.hpp"
+#include "UnitScriptData.h"
 
 namespace SparCraft
 {
@@ -48,11 +49,14 @@ public:
 	AlphaBetaSearchAbstract(const AlphaBetaSearchParameters & params, TTPtr TT = TTPtr((TranspositionTable *)NULL));
 
 	void doSearch(GameState & initialState);
+        void doSearchWithMoves(GameState & initialState, UnitScriptData & UnitScriptData, std::set<Unit> & unitsAB);
 
 	// search functions
 	AlphaBetaValue IDAlphaBeta(GameState & initialState, const size_t & maxDepth);
 	AlphaBetaValue alphaBeta(GameState & state, size_t depth, const IDType lastPlayerToMove, std::vector<Action> * firstSimMove, StateEvalScore alpha, StateEvalScore beta);
-
+        // search functions overload
+        AlphaBetaValue IDAlphaBetaWithPGS(GameState & initialState, const size_t & maxDepth, UnitScriptData & UnitScriptData, std::set<Unit> & unitsAB);
+        AlphaBetaValue alphaBetaWithPGS(GameState & state, size_t depth, const IDType lastPlayerToMove, std::vector<Action> * firstSimMove, StateEvalScore alpha, StateEvalScore beta, UnitScriptData & UnitScriptData, std::set<Unit> & unitsAB );
 	// Transposition Table
 	TTLookupValue TTlookup(const GameState & state, StateEvalScore & alpha, StateEvalScore & beta, const size_t & depth);
 	void TTsave(GameState & state, const StateEvalScore & value, const StateEvalScore & alpha, const StateEvalScore & beta, const size_t & depth, 

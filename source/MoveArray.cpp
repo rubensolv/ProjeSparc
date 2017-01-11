@@ -194,3 +194,29 @@ void MoveArray::addUnit() 											{ _numUnits++; }
 const size_t & MoveArray::numUnits()						const	{ return _numUnits; }
 const size_t & MoveArray::numUnitsInTuple()				const	{ return numUnits(); }
 const size_t & MoveArray::numMoves(const size_t & unit)	const	{ return _numMoves[unit]; }
+
+void MoveArray::replaceMovimentUnit(const Action & move){
+    /*
+     *  _moves[move.unit()][_numMoves[move.unit()]] = move;
+        _numMoves[move.unit()]++;
+
+        _currentMovesIndex[_numUnits-1] = 0;
+        _currentMoves[_numUnits-1] = _moves[move.unit()][0];
+     */
+    _numMoves[move.unit()] = 0;
+    _moves[move.unit()][_numMoves[move.unit()]] = move;
+    _numMoves[move.unit()] = 1;
+    
+    _currentMoves[move.unit()] = _moves[move.unit()][0];
+    
+}
+
+void MoveArray::print(){
+     for (size_t u(0); u<numUnits(); ++u)
+    {
+        for (int a(numMoves(u)-1); a >= 0; --a)
+        {
+            std::cout<< _moves[u][a].debugString() << std::endl;
+        }
+     }
+}

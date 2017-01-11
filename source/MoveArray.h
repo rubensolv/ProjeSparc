@@ -5,63 +5,67 @@
 #include "Unit.h"
 #include "Action.h"
 
-namespace SparCraft
-{
-class MoveArray
-{
-	// the array which contains all the moves
-	Array2D<Action, Constants::Max_Units, Constants::Max_Moves> _moves;
+namespace SparCraft {
 
-	// how many moves each unit has
-	Array<size_t, Constants::Max_Units>                         _numMoves;
+    class MoveArray {
+        // the array which contains all the moves
+        Array2D<Action, Constants::Max_Units, Constants::Max_Moves> _moves;
 
-    // the current move array, used for the 'iterator'
-    //std::vector<Action> _currentMoves;
-    //std::vector<Action>                                             _currentMovesVec;
-    Array<Action, Constants::Max_Units>                         _currentMoves;
-    Array<size_t, Constants::Max_Units>                         _currentMovesIndex;
+        // how many moves each unit has
+        Array<size_t, Constants::Max_Units> _numMoves;
 
-	// the number of units that have moves;
-	size_t                                                      _numUnits;
-	size_t                                                              _maxUnits;
-    bool                                                                _hasMoreMoves;
+        // the current move array, used for the 'iterator'
+        //std::vector<Action> _currentMoves;
+        //std::vector<Action>                                             _currentMovesVec;
+        Array<Action, Constants::Max_Units> _currentMoves;
+        Array<size_t, Constants::Max_Units> _currentMovesIndex;
 
-public:
+        // the number of units that have moves;
+        size_t _numUnits;
+        size_t _maxUnits;
+        bool _hasMoreMoves;
 
-	MoveArray(const size_t maxUnits = 0);
+    public:
 
-	void clear();
+        MoveArray(const size_t maxUnits = 0);
 
-	// returns a given move from a unit
-	const Action & getMove(const size_t & unit, const size_t & move) const;
+        void clear();
 
-    void printCurrentMoveIndex();
+        // returns a given move from a unit
+        const Action & getMove(const size_t & unit, const size_t & move) const;
 
-    void incrementMove(const size_t & unit);
+        void printCurrentMoveIndex();
 
-    const bool hasMoreMoves() const;
+        void incrementMove(const size_t & unit);
 
-    void resetMoveIterator();
+        const bool hasMoreMoves() const;
 
-    void getNextMoveVec(std::vector<Action> & moves);
+        void resetMoveIterator();
 
-	const size_t maxUnits() const;
+        void getNextMoveVec(std::vector<Action> & moves);
 
-	// adds a Move to the unit specified
-	void add(const Action & move);
-	
-	bool validateMoves();
+        const size_t maxUnits() const;
 
-	const IDType getUnitID(const IDType & unit) const;
+        // adds a Move to the unit specified
+        void add(const Action & move);
 
-	const IDType getPlayerID(const IDType & unit) const;
+        bool validateMoves();
 
-	void addUnit();
+        const IDType getUnitID(const IDType & unit) const;
 
-    void shuffleMoveActions();
+        const IDType getPlayerID(const IDType & unit) const;
 
-	const size_t & numUnits()						const;
-	const size_t & numUnitsInTuple()				const;
-	const size_t & numMoves(const size_t & unit)	const;
-};
+        void addUnit();
+
+        void shuffleMoveActions();
+
+        const size_t & numUnits() const;
+        const size_t & numUnitsInTuple() const;
+        const size_t & numMoves(const size_t & unit) const;
+        
+        //utilizada para substituir os movimentos de uma unidade
+        void replaceMovimentUnit(const Action & move);
+        
+        void print();
+    };
 }

@@ -35,6 +35,7 @@ public:
 
     PortfolioGreedySearch(const IDType & player, const IDType & enemyScript, const size_t & iter, const size_t & responses, const size_t & timeLimit);
     std::vector<Action> search(const IDType & player, const GameState & state);
+    UnitScriptData searchForScripts(const IDType & player, const GameState & state);
 };
 
 }
