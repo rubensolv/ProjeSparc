@@ -56,9 +56,7 @@ UnitScriptData PortfolioGreedySearch::searchForScripts(const IDType & player, co
     //currentScriptData.calculateMoves(player, moves, copy, moveVec);
     
     _totalEvals = 0;
-    ms = t.getElapsedTimeInMilliSec();
-    printf("\nFirst Part %lf ms\n", ms);
-    return currentScriptData;
+    return  currentScriptData;
 }
 
 
@@ -86,6 +84,8 @@ std::vector<Action> PortfolioGreedySearch::search(const IDType & player, const G
     UnitScriptData currentScriptData(originalScriptData);
     doPortfolioSearch(player, state, currentScriptData);
 
+ //   ms = t.getElapsedTimeInMilliSec();
+//    printf("\npos busca %lf ms\n", ms);
     // iterate as many times as required
     for (size_t i(0); i<_responses; ++i)
     {
@@ -104,6 +104,8 @@ std::vector<Action> PortfolioGreedySearch::search(const IDType & player, const G
     currentScriptData.calculateMoves(player, moves, copy, moveVec);
 
     _totalEvals = 0;
+    ms = t.getElapsedTimeInMilliSec();
+    //printf("\nPGS   versão normal %lf ms\n", ms);
 
     return moveVec;
 }

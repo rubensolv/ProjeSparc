@@ -52,6 +52,7 @@ namespace SparCraft {
         void controlUnitsForAB(GameState & state, const MoveArray & moves);
         bool unitsInMoves(GameState& state, const MoveArray& moves);
         
+        
         //idéia da análise de inclusão de outras unidades inimigas que podem ser atacadas
         void addMoreEnemy(GameState & newState, std::vector<Unit> & unInimigas);
         

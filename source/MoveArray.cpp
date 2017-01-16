@@ -212,6 +212,7 @@ void MoveArray::replaceMovimentUnit(const Action & move){
 }
 
 void MoveArray::print(){
+    std::cout<<"888888888888888888888888888888888888888888"<<std::endl;
      for (size_t u(0); u<numUnits(); ++u)
     {
         for (int a(numMoves(u)-1); a >= 0; --a)
@@ -219,4 +220,5 @@ void MoveArray::print(){
             std::cout<< _moves[u][a].debugString() << std::endl;
         }
      }
+    std::cout<<"888888888888888888888888888888888888888888"<<std::endl;
 }

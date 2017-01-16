@@ -489,17 +489,20 @@ AlphaBetaValue AlphaBetaSearchAbstract::alphaBetaWithPGS(GameState & state, size
             state.generateMoves(movesPgs, playerToMove);
             std::vector<Action> moveVecPgs;
             GameState copy(state);
-            UnitScriptData.calculateMoves(playerToMove, moves, copy, moveVecPgs);   
+            UnitScriptData.calculateMoves(playerToMove, movesPgs, copy, moveVecPgs);   
         //efetuo a troca dentro do MoveArray
             for (size_t unitIndex(0); unitIndex < moves.numUnits(); ++unitIndex) {
                 const Unit & unit = state.getUnit(playerToMove, unitIndex);
                 
-                if( unitsAB.find(unit) == unitsAB.end()  ) {
+                    if( unitsAB.find(unit) != unitsAB.cend() ){
+                        
+                    }else{
                         moves.replaceMovimentUnit(moveVecPgs[unitIndex]);
-                }    
+                    }                        
+                  
             }
         }
-    
+       
 	    
     size_t moveNumber(0);
     std::vector<Action> moveVec;

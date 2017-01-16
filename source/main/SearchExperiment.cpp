@@ -729,8 +729,8 @@ void SearchExperiment::addSeparatedState(  std::vector<std::string> & unitTypes,
         for (int u(0); u<numUnits[i]; ++u)
 	    {
             Position r((rand.nextInt() % (2*xLimit)) - xLimit, (rand.nextInt() % (2*yLimit)) - yLimit);
-            Position u1(cx1 + r.x(), cy1 + r.y());
-            Position u2(cx2 - r.x(), cy2 - r.y());
+            Position u1(cx1  + r.x(), cy1 + r.y());
+            Position u2(cx2  - r.x(), cy2 - r.y());
 
             state.addUnit(type, Players::Player_One, u1);
             state.addUnit(type, Players::Player_Two, u2);
