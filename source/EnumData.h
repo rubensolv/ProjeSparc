@@ -42,6 +42,7 @@ public:
 
         names[ID] = s;
         nameMap[s] = ID;
+        //printf("Adding %s with id: %d", s, ID);
     }
 
     static const IDType getID(const std::string & s)
@@ -106,14 +107,16 @@ public:
     public:
 
         enum {
-            AlphaBeta, AttackClosest, Kiter, Random, AttackWeakest, AttackDPS, KiterDPS, NOKDPS, Kiter_NOKDPS, Cluster, 
-            PortfolioGreedySearch, UCT, GenerationClass, None, Size
+            AlphaBeta, AdaptiveBeamAlphaBeta, AttackClosest, Kiter, Random, AttackWeakest, AttackDPS, KiterDPS, NOKDPS, Kiter_NOKDPS, Cluster, 
+            PortfolioGreedySearch, PortfolioOnlineEvolution, UCT, ImprovedPortfolioGreedySearch, StratifiedPolicySearch, AdaptableStratifiedPolicySearch,
+            IRStratifiedPolicySearch, MoveForward, MoveBackward, GenerationClass, None, Size
         };
 
         static void init() {
             setType("PlayerModels");
             names.resize(Size);
             setData(AlphaBeta, "AlphaBeta");
+setData(AdaptiveBeamAlphaBeta,  		"AdaptiveBeamAlphaBeta");
             setData(AttackClosest, "AttackClosest");
             setData(Kiter, "Kiter");
             setData(Random, "Random");
@@ -124,7 +127,14 @@ public:
             setData(Kiter_NOKDPS, "Kiter_NOKDPS");
             setData(Cluster, "Cluster");
             setData(PortfolioGreedySearch, "PortfolioGreedySearch");
+setData(PortfolioOnlineEvolution,  		"PortfolioOnlineEvolution");
+        setData(ImprovedPortfolioGreedySearch,  "ImprovedPortfolioGreedySearch");
             setData(UCT, "UCT");
+        setData(StratifiedPolicySearch, 		"StratifiedPolicySearch");
+        setData(AdaptableStratifiedPolicySearch, 		"AdaptableStratifiedPolicySearch");
+        setData(IRStratifiedPolicySearch, 		"IRStratifiedPolicySearch");
+        setData(MoveForward, 					"MoveForward");
+        setData(MoveBackward, 					"MoveBackward");
             //incluída para teste
             setData(GenerationClass, "GenerationClass");
             setData(None, "None");

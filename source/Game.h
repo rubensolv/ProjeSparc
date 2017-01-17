@@ -7,6 +7,8 @@
 #include "Action.h"
 #include "UnitScriptData.h"
 #include <memory>
+
+#include "PortfolioOnlineGenome.h"
 #include "Timer.h"
 
 namespace SparCraft
@@ -15,6 +17,7 @@ namespace SparCraft
 typedef	std::shared_ptr<Player> PlayerPtr;
 
 class UnitScriptData;
+class PortfolioOnlineGenome;
 
 class Game
 {
@@ -44,6 +47,8 @@ public:
 	void            play();
     void            playNextTurn();
     void            playIndividualScripts(UnitScriptData & scriptsChosen);
+    const StateEvalScore playLimitedIndividualScripts(const IDType & player, UnitScriptData & scriptsChosen, int limit);
+    const StateEvalScore playoutGenome(const IDType & player, PortfolioOnlineGenome & genome, int limit);
 	void            storeHistory(const bool & store);
 	bool            gameOver() const;
     

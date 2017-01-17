@@ -15,7 +15,7 @@ void Player_UCT::getMoves(GameState & state, const MoveArray & moves, std::vecto
     UCTSearch uct(_params);
 
     uct.doSearch(state, moveVec);
-    _prevResults = uct.getResults();    
+    _prevResults = uct.getResults();
 }
 
 UCTSearchParameters & Player_UCT::getParams()

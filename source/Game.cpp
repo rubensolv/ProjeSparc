@@ -32,6 +32,12 @@ void Game::play()
 
     t.start();
 
+    _players[Players::Player_One]->init(state, Players::Player_One);
+    _players[Players::Player_Two]->init(state, Players::Player_Two);
+
+    _players[Players::Player_One]->choosePolicy(state);
+    _players[Players::Player_Two]->choosePolicy(state);
+
     // play until there is no winner
     while (!gameOver())
     {
@@ -41,7 +47,16 @@ void Game::play()
         }
 
         playNextTurn();
+
+        if(gameOver())
+        {
+        	_players[Players::Player_One]->updateStat(state);
+        	_players[Players::Player_Two]->updateStat(state);
+        }
     }
+
+    _players[Players::Player_One]->finish();
+    _players[Players::Player_Two]->finish();
 
     gameTimeMS = t.getElapsedTimeInMilliSec();
 }
@@ -58,6 +73,9 @@ void Game::playNextTurn()
     const IDType playerToMove(getPlayerToMove());
     PlayerPtr & toMove = _players[playerToMove];
     PlayerPtr & enemy = _players[state.getEnemy(playerToMove)];
+
+ //   toMove->updateStat(state);
+ //   toMove->choosePolicy(state);
 
     // generate the moves possible from this state
     state.generateMoves(moves[toMove->ID()], toMove->ID());
@@ -79,6 +97,147 @@ void Game::playNextTurn()
 
     state.finishedMoving();
     rounds++;
+}
+
+// play the game until there is a winner
+const StateEvalScore Game::playLimitedIndividualScripts(const IDType & player, UnitScriptData & scriptData, int limit)
+{
+    // array which will hold all the script moves for players
+    Array2D<std::vector<Action>, Constants::Num_Players, PlayerModels::Size> allScriptMoves;
+
+    scriptMoves[Players::Player_One] = std::vector<Action>(state.numUnits(Players::Player_One));
+    scriptMoves[Players::Player_Two] = std::vector<Action>(state.numUnits(Players::Player_Two));
+
+    t.start();
+
+    // play until there is no winner
+    while (!gameOver())
+    {
+        if ((rounds > limit) || (moveLimit && rounds > moveLimit))
+        {
+            break;
+        }
+
+        Timer frameTimer;
+        frameTimer.start();
+
+        // clear all script moves for both players
+        for (IDType p(0); p<Constants::Num_Players; p++)
+        {
+            for (IDType s(0); s<PlayerModels::Size; ++s)
+            {
+                allScriptMoves[p][s].clear();
+            }
+        }
+
+        // clear the moves we will actually be doing
+        scriptMoves[0].clear();
+        scriptMoves[1].clear();
+
+        // the playr that will move next
+        const IDType playerToMove(getPlayerToMove());
+        const IDType enemyPlayer(state.getEnemy(playerToMove));
+
+        // generate the moves possible from this state
+        state.generateMoves(moves[playerToMove], playerToMove);
+
+        // calculate the moves the unit would do given its script preferences
+        scriptData.calculateMoves(playerToMove, moves[playerToMove], state, scriptMoves[playerToMove]);
+
+        // if both players can move, generate the other player's moves
+        if (state.bothCanMove())
+        {
+            state.generateMoves(moves[enemyPlayer], enemyPlayer);
+
+            scriptData.calculateMoves(enemyPlayer, moves[enemyPlayer], state, scriptMoves[enemyPlayer]);
+
+            state.makeMoves(scriptMoves[enemyPlayer]);
+        }
+
+        // make the moves
+        state.makeMoves(scriptMoves[playerToMove]);
+        state.finishedMoving();
+        rounds++;
+    }
+    //StateEvalScore evalScore = state.eval(_params.maxPlayer(), _params.evalMethod(), _params.simScript(Players::Player_One), _params.simScript(Players::Player_Two));
+
+    gameTimeMS = t.getElapsedTimeInMilliSec();
+    return state.eval(player, SparCraft::EvaluationMethods::Playout, PlayerModels::NOKDPS, PlayerModels::NOKDPS);
+}
+
+const StateEvalScore Game::playoutGenome(const IDType & player, PortfolioOnlineGenome & scriptData, int limit)
+{
+    // array which will hold all the script moves for players
+    Array2D<std::vector<Action>, Constants::Num_Players, PlayerModels::Size> allScriptMoves;
+
+    scriptMoves[Players::Player_One] = std::vector<Action>(state.numUnits(Players::Player_One));
+    scriptMoves[Players::Player_Two] = std::vector<Action>(state.numUnits(Players::Player_Two));
+
+    scriptData.resetIterator();
+    t.start();
+
+    // play until there is no winner
+    while (!gameOver())
+    {
+    	//std::cout << "Round: " << rounds << std::endl;
+        if ((rounds > 100) || (moveLimit && rounds > moveLimit))
+        {
+            break;
+        }
+
+        if(!scriptData.hasMoreMoves())
+        {
+        	break;
+        }
+
+        Timer frameTimer;
+        frameTimer.start();
+
+        // clear all script moves for both players
+        for (IDType p(0); p<Constants::Num_Players; p++)
+        {
+            for (IDType s(0); s<PlayerModels::Size; ++s)
+            {
+                allScriptMoves[p][s].clear();
+            }
+        }
+
+        // clear the moves we will actually be doing
+        scriptMoves[0].clear();
+        scriptMoves[1].clear();
+
+        // the playr that will move next
+        const IDType playerToMove(getPlayerToMove());
+        const IDType enemyPlayer(state.getEnemy(playerToMove));
+
+        // generate the moves possible from this state
+        state.generateMoves(moves[playerToMove], playerToMove);
+
+        // calculate the moves the unit would do given its script preferences
+        //scriptData.calculateMoves(playerToMove, moves[playerToMove], state, scriptMoves[playerToMove]);
+        scriptData.calculateNextMoves(playerToMove, moves[playerToMove], state, scriptMoves[playerToMove]);
+        
+        // if both players can move, generate the other player's moves
+        if (state.bothCanMove())
+        {
+            state.generateMoves(moves[enemyPlayer], enemyPlayer);
+
+            //scriptData.calculateMoves(enemyPlayer, moves[enemyPlayer], state, scriptMoves[enemyPlayer]);
+            scriptData.calculateNextMoves(enemyPlayer, moves[enemyPlayer], state, scriptMoves[enemyPlayer]);
+
+            state.makeMoves(scriptMoves[enemyPlayer]);
+        }
+
+        // make the moves
+        state.makeMoves(scriptMoves[playerToMove]);
+        state.finishedMoving();
+        rounds++;
+    }
+    //StateEvalScore evalScore = state.eval(_params.maxPlayer(), _params.evalMethod(), _params.simScript(Players::Player_One), _params.simScript(Players::Player_Two));
+
+    gameTimeMS = t.getElapsedTimeInMilliSec();
+    //return state.eval(player, SparCraft::EvaluationMethods::Playout, PlayerModels::NOKDPS, PlayerModels::NOKDPS);
+    return state.evalSimLimited(player, PlayerModels::NOKDPS, PlayerModels::NOKDPS, limit);
 }
 
 // play the game until there is a winner

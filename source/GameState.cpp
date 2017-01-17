@@ -823,6 +823,20 @@ const ScoreType GameState::evalLTD2(const IDType & player) const
 	return LTD2(player) - LTD2(enemyPlayer);
 }
 
+const StateEvalScore GameState::evalSimNOKDPS(const IDType & player) const
+{
+	PlayerPtr p1(AllPlayers::getPlayerPtr(Players::Player_One, PlayerModels::NOKDPS));
+	PlayerPtr p2(AllPlayers::getPlayerPtr(Players::Player_Two, PlayerModels::NOKDPS));
+
+	Game game(*this, p1, p2, 200);
+
+	game.play();
+
+	ScoreType evalReturn = game.getState().evalLTD2(player);
+
+	return StateEvalScore(evalReturn, game.getState().getNumMovements(player));
+}
+
 const StateEvalScore GameState::evalSim(const IDType & player, const IDType & p1Script, const IDType & p2Script) const
 {
 	const IDType p1Model = (p1Script == PlayerModels::Random) ? PlayerModels::NOKDPS : p1Script;
@@ -832,6 +846,23 @@ const StateEvalScore GameState::evalSim(const IDType & player, const IDType & p1
 	PlayerPtr p2(AllPlayers::getPlayerPtr(Players::Player_Two, p2Model));
 
 	Game game(*this, p1, p2, 200);
+
+	game.play();
+
+	ScoreType evalReturn = game.getState().evalLTD2(player);
+
+	return StateEvalScore(evalReturn, game.getState().getNumMovements(player));
+}
+
+const StateEvalScore GameState::evalSimLimited(const IDType & player, const IDType & p1Script, const IDType & p2Script, int limit) const
+{
+	const IDType p1Model = (p1Script == PlayerModels::Random) ? PlayerModels::NOKDPS : p1Script;
+	const IDType p2Model = (p2Script == PlayerModels::Random) ? PlayerModels::NOKDPS : p2Script;
+
+	PlayerPtr p1(AllPlayers::getPlayerPtr(Players::Player_One, p1Model));
+	PlayerPtr p2(AllPlayers::getPlayerPtr(Players::Player_Two, p2Model));
+
+	Game game(*this, p1, p2, limit);
 
 	game.play();
 

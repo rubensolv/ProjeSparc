@@ -20,6 +20,9 @@ class SparCraft::AlphaBetaSearchParameters
     IDType          _simScripts[2];                 // NOKDPS               Policy to use for playouts
 	IDType		    _playerToMoveMethod;		    // Alternate			The player to move policy
 	IDType		    _playerModel[2];                // None                 Player model to use for each player
+	int 			_beamSize;
+	bool			_learning;
+	std::string		_policyFilename;
 
     std::string     _graphVizFilename;              // ""                   File name to output graph viz file
 
@@ -39,6 +42,9 @@ public:
         , _moveOrdering         (MoveOrderMethod::ScriptFirst)
         , _evalMethod           (SparCraft::EvaluationMethods::Playout)
 	    , _playerToMoveMethod   (SparCraft::PlayerToMove::Alternate)
+		, _beamSize				(20)
+		, _policyFilename		("policy_filename")
+		, _learning				(false)
     {
 	    setPlayerModel(Players::Player_One, PlayerModels::None);
 	    setPlayerModel(Players::Player_Two, PlayerModels::None);
@@ -48,6 +54,9 @@ public:
     const IDType & searchMethod()							    const   { return _searchMethod; }
     const IDType & maxPlayer()							        const   { return _maxPlayer; }
     const IDType & maxDepth()							        const   { return _maxDepth; }
+    const int & getBeamSize()								    const   { return _beamSize; }
+    const std::string & getFilename()							const   { return _policyFilename; }
+    const bool & isLearning()								    const   { return _learning; }
     const size_t & timeLimit()							        const   { return _timeLimit; }
     const size_t & maxChildren()                                const   { return _maxChildren; }
     const IDType & moveOrderingMethod()                         const   { return _moveOrdering; }
@@ -61,6 +70,9 @@ public:
     void setSearchMethod(const IDType & method)                         { _searchMethod = method; }
     void setMaxPlayer(const IDType & player)					        { _maxPlayer = player; }
     void setMaxDepth(const IDType & depth)                              { _maxDepth = depth; }
+    void setBeamSize(const int & beam)                               	{ _beamSize = beam; }
+    void setPolicyFilename(const std::string & file)                   	{ _policyFilename = file; }
+    void setLearning(const bool & learning)                             { _learning = learning; }
     
     void setTimeLimit(const size_t & timeLimit)					        { _timeLimit = timeLimit; }
     void setMaxChildren(const size_t & children)                        { _maxChildren = children; }

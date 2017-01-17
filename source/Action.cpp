@@ -18,7 +18,7 @@ Action::Action( const IDType & unitIndex, const IDType & player, const IDType & 
     , _moveIndex(moveIndex)
     , _p(dest)
 {
-        
+        //comment 12
 }
 
 Action::Action( const IDType & unitIndex, const IDType & player, const IDType & type, const IDType & moveIndex)
@@ -97,4 +97,5 @@ const std::string Action::debugString() const
     ss << moveString() << ": (" << (int)unit() << "," << (int)player() << "," << (int)type() << "," << (int)index() << ")  " << "(" << pos().x() << "," << pos().y()   << ")";
     return ss.str();
 }
+
 

@@ -6,7 +6,13 @@
 
 // search-based players
 #include "Player_AlphaBeta.h"
+#include "Player_AdaptiveBeamAlphaBeta.h"
 #include "Player_PortfolioGreedySearch.h"
+#include "Player_StratifiedPolicySearch.h"
+#include "Player_IRStratifiedPolicySearch.h"
+#include "Player_ImprovedPortfolioGreedySearch.h"
+#include "Player_PortfolioOnlineEvolution.h"
+#include "Player_AdaptableStratifiedPolicySearch.h"
 #include "Player_UCT.h"
 
 // script-based players
@@ -20,6 +26,8 @@
 #include "Player_Cluster.h"
 #include "Player_Random.h"
 #include "GenerationClass.h"
+#include "Player_MoveForward.h"
+#include "Player_MoveBackward.h"
 
 namespace SparCraft
 {

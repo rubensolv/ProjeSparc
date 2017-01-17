@@ -9,8 +9,7 @@ Player_Kiter::Player_Kiter (const IDType & playerID)
 }
 
 void Player_Kiter::getMoves(GameState & state, const MoveArray & moves, std::vector<Action> & moveVec)
-{     
-    
+{
     moveVec.clear();
 	for (IDType u(0); u<moves.numUnits(); ++u)
 	{

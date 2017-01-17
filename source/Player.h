@@ -17,6 +17,10 @@ protected:
     IDType _playerID;
 public:
     virtual void		getMoves(GameState & state, const MoveArray & moves, std::vector<Action> & moveVec);
+    virtual void		choosePolicy(GameState & state);
+    virtual void		updateStat(GameState & state);
+    virtual void 		init(GameState & state, const int max_player);
+    virtual void		finish();
     const IDType        ID();
     void                setID(const IDType & playerid);
     virtual IDType      getType() { return PlayerModels::None; }

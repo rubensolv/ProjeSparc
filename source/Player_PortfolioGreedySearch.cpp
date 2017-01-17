@@ -6,7 +6,7 @@ Player_PortfolioGreedySearch::Player_PortfolioGreedySearch (const IDType & playe
 {
 	_playerID = playerID;
 	_iterations = 1;
-        _responses = 0;
+    _responses = 0;
 	_seed = PlayerModels::NOKDPS;
 }
 
@@ -14,9 +14,9 @@ Player_PortfolioGreedySearch::Player_PortfolioGreedySearch (const IDType & playe
 {
 	_playerID = playerID;
 	_iterations = iter;
-        _responses = responses;
+    _responses = responses;
 	_seed = seed;
-        _timeLimit = timeLimit;
+    _timeLimit = timeLimit;
 }
 
 void Player_PortfolioGreedySearch::getMoves(GameState & state, const MoveArray & moves, std::vector<Action> & moveVec)

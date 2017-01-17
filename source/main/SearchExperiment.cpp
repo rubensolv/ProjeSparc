@@ -292,6 +292,9 @@ void SearchExperiment::addState(const std::string & line)
     iss >> stateType;
     iss >> numStates;
 
+    std::cout << "\nAdding " << numStates <<  " State(s)\n\n";
+
+
     if (strcmp(stateType.c_str(), "StateSymmetric") == 0)
     { 
         int xLimit, yLimit;
@@ -310,7 +313,7 @@ void SearchExperiment::addState(const std::string & line)
             numUnitVec.push_back(numUnits);
         }
 
-        //std::cout << "\nAdding " << numStates <<  " Symmetric State(s)\n\n";
+     //   std::cout << "\nAdding " << numStates <<  " Symmetric State(s)\n\n";
 
         for (int s(0); s<numStates; ++s)
         {
@@ -365,6 +368,31 @@ void SearchExperiment::addState(const std::string & line)
         for (int s(0); s<numStates/2; ++s)
         {
             addSeparatedState(unitVec, numUnitVec, cx1, cy1, cx2, cy2, xLimit, yLimit);
+        }
+    }
+    else if (strcmp(stateType.c_str(), "StateSymmetricVerticalLine") == 0)
+    {
+        int xLimit, yLimit;
+        iss >> xLimit;
+        iss >> yLimit;
+
+        std::vector<std::string> unitVec;
+        std::vector<int> numUnitVec;
+        std::string unitType;
+        int numUnits;
+
+        while (iss >> unitType)
+        {
+            iss >> numUnits;
+            unitVec.push_back(unitType);
+            numUnitVec.push_back(numUnits);
+        }
+
+        //std::cout << "\nAdding " << numStates <<  " Symmetric State(s)\n\n";
+
+        for (int s(0); s<numStates; ++s)
+        {
+            states.push_back(getSymmetricVerticalLineState(unitVec, numUnitVec, xLimit, yLimit));
         }
     }
     else
@@ -445,7 +473,7 @@ void SearchExperiment::addPlayer(const std::string & line)
     iss >> playerModelString;
 
     playerStrings[playerID].push_back(playerModelString);
-    
+
     playerModelID = PlayerModels::getID(playerModelString);
     
 
@@ -491,6 +519,34 @@ void SearchExperiment::addPlayer(const std::string & line)
     { 
         players[playerID].push_back(PlayerPtr(new GenerationClass(playerID))); 
     }
+else if (playerModelID == PlayerModels::ImprovedPortfolioGreedySearch)
+    {
+        std::string enemyPlayerModel;
+        size_t timeLimit(0);
+        int iterations(1);
+        int responses(0);
+
+        iss >> timeLimit;
+        iss >> enemyPlayerModel;
+        iss >> iterations;
+        iss >> responses;
+
+        players[playerID].push_back(PlayerPtr(new Player_ImprovedPortfolioGreedySearch(playerID, PlayerModels::getID(enemyPlayerModel), iterations, responses, timeLimit)));
+    }
+    else if (playerModelID == PlayerModels::PortfolioOnlineEvolution)
+    {
+        std::string enemyPlayerModel;
+        size_t timeLimit(80);
+        int iterations(1);
+        int responses(0);
+
+        iss >> timeLimit;
+        iss >> enemyPlayerModel;
+        iss >> iterations;
+        iss >> responses;
+
+        players[playerID].push_back(PlayerPtr(new Player_PortfolioOnlineEvolution(playerID, PlayerModels::getID(enemyPlayerModel), iterations, responses, timeLimit)));
+    }
     else if (playerModelID == PlayerModels::PortfolioGreedySearch)				
     { 
         std::string enemyPlayerModel;
@@ -504,6 +560,129 @@ void SearchExperiment::addPlayer(const std::string & line)
         iss >> responses;
 
         players[playerID].push_back(PlayerPtr(new Player_PortfolioGreedySearch(playerID, PlayerModels::getID(enemyPlayerModel), iterations, responses, timeLimit))); 
+    }
+    else if (playerModelID == PlayerModels::IRStratifiedPolicySearch)
+    {
+        std::string enemyPlayerModel;
+        size_t timeLimit(0);
+        int iterations(1);
+        int responses(0);
+
+        iss >> timeLimit;
+        iss >> enemyPlayerModel;
+        iss >> iterations;
+        iss >> responses;
+
+        players[playerID].push_back(PlayerPtr(new Player_IRStratifiedPolicySearch(playerID, PlayerModels::getID(enemyPlayerModel), iterations, responses, timeLimit)));
+    }
+    else if (playerModelID == PlayerModels::AdaptableStratifiedPolicySearch)
+    {
+        std::string enemyPlayerModel;
+        size_t timeLimit(0);
+        int iterations(1);
+        int responses(0);
+
+        iss >> timeLimit;
+        iss >> enemyPlayerModel;
+        iss >> iterations;
+        iss >> responses;
+
+        players[playerID].push_back(PlayerPtr(new Player_AdaptableStratifiedPolicySearch(playerID, PlayerModels::getID(enemyPlayerModel), iterations, responses, timeLimit)));
+    }
+    else if (playerModelID == PlayerModels::StratifiedPolicySearch)
+    {
+        std::string enemyPlayerModel;
+        size_t timeLimit(0);
+        int iterations(1);
+        int responses(0);
+
+        iss >> timeLimit;
+        iss >> enemyPlayerModel;
+        iss >> iterations;
+        iss >> responses;
+
+        players[playerID].push_back(PlayerPtr(new Player_StratifiedPolicySearch(playerID, PlayerModels::getID(enemyPlayerModel), iterations, responses, timeLimit)));
+    }
+    else if (playerModelID == PlayerModels::AdaptiveBeamAlphaBeta)
+    {
+        int             timeLimitMS;
+        int             maxChildren;
+        int     		beamSize;
+        bool			learning;
+        std::string     moveOrdering;
+        std::string     evalMethod;
+        std::string     playoutScript1;
+        std::string     playoutScript2;
+        std::string     playerToMoveMethod;
+        std::string     opponentModelScript;
+        std::string		policyFilename;
+
+        // read in the values
+        iss >> timeLimitMS;
+        iss >> maxChildren;
+        iss >> moveOrdering;
+        iss >> evalMethod;
+        iss >> playoutScript1;
+        iss >> playoutScript2;
+        iss >> playerToMoveMethod;
+        iss >> opponentModelScript;
+        iss >> beamSize;
+        iss >> learning;
+        iss >> policyFilename;
+
+        // convert them to the proper enum types
+        int moveOrderingID      = MoveOrderMethod::getID(moveOrdering);
+        int evalMethodID        = EvaluationMethods::getID(evalMethod);
+        int playoutScriptID1    = PlayerModels::getID(playoutScript1);
+        int playoutScriptID2    = PlayerModels::getID(playoutScript2);
+        int playerToMoveID      = PlayerToMove::getID(playerToMoveMethod);
+        int opponentModelID     = PlayerModels::getID(opponentModelScript);
+
+        // construct the parameter object
+        AlphaBetaSearchParameters params;
+
+        // give the default parameters we can't set via options
+	    params.setMaxDepth(50);
+        params.setSearchMethod(SearchMethods::IDAlphaBeta);
+
+        // set the parameters from the options in the file
+	    params.setMaxPlayer(playerID);
+	    params.setTimeLimit(timeLimitMS);
+        params.setMaxChildren(maxChildren);
+        params.setMoveOrderingMethod(moveOrderingID);
+        params.setEvalMethod(evalMethodID);
+        params.setSimScripts(playoutScriptID1, playoutScriptID2);
+        params.setPlayerToMoveMethod(playerToMoveID);
+        params.setBeamSize(beamSize);
+        params.setLearning(learning);
+        params.setPolicyFilename(policyFilename);
+
+        // add scripts for move ordering
+        if (moveOrderingID == MoveOrderMethod::ScriptFirst)
+        {
+            params.addOrderedMoveScript(PlayerModels::NOKDPS);
+            params.addOrderedMoveScript(PlayerModels::KiterDPS);
+            //params.addOrderedMoveScript(PlayerModels::Cluster);
+            //params.addOrderedMoveScript(PlayerModels::AttackWeakest);
+        }
+
+        // set opponent modeling if it's not none
+        if (opponentModelID != PlayerModels::None)
+        {
+            if (playerID == 0)
+            {
+                params.setSimScripts(playoutScriptID1, opponentModelID);
+                params.setPlayerModel(1, playoutScriptID2);
+            }
+            else
+            {
+                params.setSimScripts(opponentModelID, playoutScriptID2);
+                params.setPlayerModel(0, playoutScriptID1);
+            }
+        }
+
+        PlayerPtr abPlayer(new Player_AdaptiveBeamAlphaBeta(playerID, params, TTPtr((TranspositionTable *)NULL)));
+        players[playerID].push_back(abPlayer);
     }
     else if (playerModelID == PlayerModels::AlphaBeta)
     {
@@ -525,7 +704,7 @@ void SearchExperiment::addPlayer(const std::string & line)
         iss >> playoutScript2;
         iss >> playerToMoveMethod;
         iss >> opponentModelScript;
-        
+
         // convert them to the proper enum types
         int moveOrderingID      = MoveOrderMethod::getID(moveOrdering);
         int evalMethodID        = EvaluationMethods::getID(evalMethod);
@@ -555,8 +734,8 @@ void SearchExperiment::addPlayer(const std::string & line)
         {
             params.addOrderedMoveScript(PlayerModels::NOKDPS);
             params.addOrderedMoveScript(PlayerModels::KiterDPS);
-            //params.addOrderedMoveScript(PlayerModels::Cluster);
-            //params.addOrderedMoveScript(PlayerModels::AttackWeakest);
+          //  params.addOrderedMoveScript(PlayerModels::Cluster);
+            params.addOrderedMoveScript(PlayerModels::AttackWeakest);
         }
 
         // set opponent modeling if it's not none
@@ -665,6 +844,45 @@ Position SearchExperiment::getRandomPosition(const PositionType & xlimit, const 
 	return Position(x, y);
 }
 
+GameState SearchExperiment::getSymmetricVerticalLineState( std::vector<std::string> & unitTypes, std::vector<int> & numUnits,
+								                const PositionType & xLimit, const PositionType & yLimit)
+{
+	GameState state;
+
+    Position mid(640, 360);
+
+    //std::cout << "   Adding";
+
+    // for each unit type to add
+    for (size_t i(0); i<unitTypes.size(); ++i)
+    {
+        BWAPI::UnitType type;
+        for (const BWAPI::UnitType & t : BWAPI::UnitTypes::allUnitTypes())
+        {
+            if (t.getName().compare(unitTypes[i]) == 0)
+            {
+                type = t;
+                break;
+            }
+        }
+
+        // add the symmetric unit for each count in the numUnits Vector
+        for (int u(0); u<numUnits[i]; ++u)
+	    {
+            Position r(rand.nextInt() % 20, rand.nextInt() % 20);
+            Position u1(mid.x() + 212 + r.x(), mid.y() + u*20 + r.y());
+            Position u2(mid.x() - 212 + r.x(), mid.y() + u*20 + r.y());
+
+            state.addUnit(type, Players::Player_One, u1);
+            state.addUnit(type, Players::Player_Two, u2);
+	    }
+    }
+
+    //std::cout << std::endl;
+	state.finishedMoving();
+	return state;
+}
+
 GameState SearchExperiment::getSymmetricState( std::vector<std::string> & unitTypes, std::vector<int> & numUnits,
 								                const PositionType & xLimit, const PositionType & yLimit)
 {
@@ -729,8 +947,8 @@ void SearchExperiment::addSeparatedState(  std::vector<std::string> & unitTypes,
         for (int u(0); u<numUnits[i]; ++u)
 	    {
             Position r((rand.nextInt() % (2*xLimit)) - xLimit, (rand.nextInt() % (2*yLimit)) - yLimit);
-            Position u1(cx1  + r.x(), cy1 + r.y());
-            Position u2(cx2  - r.x(), cy2 - r.y());
+            Position u1(cx1 + r.x(), cy1 + r.y());
+            Position u2(cx2 - r.x(), cy2 - r.y());
 
             state.addUnit(type, Players::Player_One, u1);
             state.addUnit(type, Players::Player_Two, u2);
@@ -911,24 +1129,25 @@ void SearchExperiment::runExperiment()
                 }
                 else
                 {
-                    g.play();
-                    gameEval = g.getState().eval(Players::Player_One, SparCraft::EvaluationMethods::LTD2).val();
+                	g.play();
+                	//printf("Finished in %d rounds \n", g.getRounds());
+               		gameEval = g.getState().eval(Players::Player_One, SparCraft::EvaluationMethods::LTD2).val();
                 }
 
                 numGames[p1Player][p2Player]++;
                 if (gameEval > 0)
                 {
-                    std::cout << " Vitoria Jogador 0" << std::endl;
+                	cout << "Vitoria Jogador 0" << endl;
                     numWins[p1Player][p2Player]++;
                 }
                 else if (gameEval < 0)
                 {
-                    std::cout << " Vitoria Jogador 1" << std::endl;
+                	cout << "Vitoria Jogador 1" << endl;
                     numLosses[p1Player][p2Player]++;
                 }
                 else if (gameEval == 0)
                 {
-                    std::cout << " Empate" << std::endl;
+                	cout << "Empate!!" << endl;
                     numDraws[p1Player][p2Player]++;
                 }
 

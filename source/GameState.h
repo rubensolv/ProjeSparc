@@ -95,6 +95,8 @@ public:
     const ScoreType         LTD(const IDType & player)                                            const;
     const ScoreType         LTD2(const IDType & player)                                           const;
     const StateEvalScore    evalSim(const IDType & player, const IDType & p1, const IDType & p2)    const;
+    const StateEvalScore    evalSimLimited(const IDType & player, const IDType & p1Script, const IDType & p2Script, int limit) const;
+    const StateEvalScore 	evalSimNOKDPS(const IDType & player) 									const;
     const IDType            getEnemy(const IDType & player)                                         const;
 
     // unit hitpoint calculations, needed for LTD2 evaluation

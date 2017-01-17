@@ -3,6 +3,9 @@
 #include "../SparCraft.h"
 #include "../gui/GUI.h"
 #include <iomanip>
+#include <iostream>
+
+using namespace std;
 
 namespace SparCraft
 {
@@ -68,7 +71,8 @@ class SearchExperiment
 
     GameState   getSymmetricState(	std::vector<std::string> & unitTypes, std::vector<int> & numUnits,
 								    const PositionType & xLimit, const PositionType & yLimit);
-    
+    GameState   getSymmetricVerticalLineState(	std::vector<std::string> & unitTypes, std::vector<int> & numUnits,
+								    const PositionType & xLimit, const PositionType & yLimit);
     GameState   getLineState(       const BWAPI::UnitType type1, const size_t & num1, 
                                     const BWAPI::UnitType type2, const size_t & num2,
                                     const size_t xSpace, const size_t ySpace);

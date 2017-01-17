@@ -10,6 +10,7 @@ GenerationClass::GenerationClass(const IDType& playerID) {
 }
 
 void GenerationClass::getMoves(GameState& state, const MoveArray& moves, std::vector<Action>& moveVec) {
+    
     Timer t;
     t.start();
     moveVec.clear();
@@ -57,7 +58,7 @@ void GenerationClass::getMoves(GameState& state, const MoveArray& moves, std::ve
         currentScriptData = pgs->searchForScripts(_playerID, state);
 
         controlUnitsForAB(state, moves);
-
+        
         std::vector<Action> moveVecPgs, movecAB;
 
         MoveArray movesPGS;
@@ -109,14 +110,12 @@ void GenerationClass::getMoves(GameState& state, const MoveArray& moves, std::ve
             }
             gPGS.getState().finishedMoving();
             gPGS.playIndividualScripts(baseScriptData);
-
+            
             if (gABPGS.getState().eval(_playerID, SparCraft::EvaluationMethods::LTD2) >
                     gPGS.getState().eval(_playerID, SparCraft::EvaluationMethods::LTD2)) {
                 moveVec.assign(alphaBeta->getResults().bestMoves.begin(), alphaBeta->getResults().bestMoves.end());
-                std::cout<<"Ficamos com o AB-PGS " <<std::endl;
             } else {
                 moveVec = moveVecPgs;
-                std::cout<<"Ficamos com o PGS " <<std::endl;
             }
 
         } else {
@@ -155,6 +154,7 @@ void GenerationClass::getMoves(GameState& state, const MoveArray& moves, std::ve
     std::cout<<"************* FIM GenerationClass PGS **************"<<std::endl;
     std::cout<<"##################################################"<<std::endl;
      */
+    
 }
 
 bool GenerationClass::unitsInMoves(GameState& state, const MoveArray& moves) {
@@ -183,6 +183,7 @@ void GenerationClass::controlUnitsForAB(GameState & state, const MoveArray & mov
     }
 
     if (state.numUnits(_playerID) <= numUnits) {
+        _unitAbsAB.clear();
         //adiciono todas as unidades para serem controladas pelo AB
         for (int u(0); u < state.numUnits(_playerID); ++u) {
             _unitAbsAB.insert(state.getUnit(_playerID, u));
@@ -192,22 +193,10 @@ void GenerationClass::controlUnitsForAB(GameState & state, const MoveArray & mov
                 and _unitAbsAB.size() == 0) {
             _unitAbsAB.insert(state.getUnit(_playerID, 0));
         } else {
-            std::vector<Unit> unidadesAliadas;
             int control = 0;
-            while (_unitAbsAB.size() < numUnits) {
+            while (_unitAbsAB.size() < numUnits and control < 10) {
                 _unitAbsAB.insert(state.getUnit(_playerID, rand() % state.numUnits(_playerID)));
-                //capturo a unidade mais próxima
-                /*
-                if(_unitAbsAB.size() >= 1){
-                    listaOrdenadaForMoves(_playerID, state.getUnitByID(_unitAbsAB.begin()->ID()), state, unidadesAliadas, moves);
-                    
-                }else{
-                    listaOrdenadaForMoves(_playerID, state.getUnit(_playerID, 0), state, unidadesAliadas, moves);
-                }
-                _unitAbsAB.insert(unidadesAliadas[control]);
                 control++;
-                 * */
-
             }
         }
     }
