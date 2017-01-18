@@ -119,8 +119,8 @@ std::vector<Action> PortfolioOnlineEvolution::search(const IDType & player, cons
     {
     	evalPopulation(player, state, population);
     	select(player, state, population);
-   // 	mutatePopulation(player, state, population);
-    	crossover(player, state, population);
+    	mutatePopulation(player, state, population);
+    	//crossover(player, state, population);
 
     	ms = t.getElapsedTimeInMilliSec();
     }

@@ -115,14 +115,14 @@ Player 0 GenerationClass
 #State SeparatedState 10 128 128 400 360 840 360 Protoss_Dragoon 20
 #State SeparatedState 10 128 128 400 360 840 360 Zerg_Zergling 20
 #State SeparatedState 10 128 128 400 360 840 360 Protoss_Dragoon 10 Protoss_Zealot 10
-State SeparatedState 10 128 128 400 360 840 360 Protoss_Dragoon 25 Terran_Marine 25
-State SeparatedState 10 128 128 400 360 840 360 Terran_Marine 25 Zerg_Zergling 25
-State SeparatedState 10 128 128 400 360 840 360 Protoss_Zealot 32
+#State SeparatedState 10 128 128 400 360 840 360 Protoss_Dragoon 25 Terran_Marine 25
+#State SeparatedState 10 128 128 400 360 840 360 Terran_Marine 25 Zerg_Zergling 25
+#State SeparatedState 10 128 128 400 360 840 360 Protoss_Zealot 32
 State SeparatedState 10 128 128 400 360 840 360 Protoss_Dragoon 14 Protoss_Zealot 14 Zerg_Zergling 14 Terran_Marine 14
 #State SeparatedState 10 128 128 400 360 840 360 Zerg_Zergling 15 Protoss_Dragoon 8
 #State SeparatedState 10 128 128 400 360 840 360 Protoss_Dragoon 32 Protoss_Zealot 32
 #State SeparatedState 10 128 128 400 360 840 360 Protoss_Dragoon 4 Terran_Marine 4
-State SeparatedState 10 128 128 400 360 840 360 Protoss_Dragoon 8 Protoss_Zealot 8
+#State SeparatedState 10 128 128 400 360 840 360 Protoss_Dragoon 8 Protoss_Zealot 8
 #State SeparatedState 10 128 128 400 360 840 360 Protoss_Zealot 16 Protoss_Dragoon 16
 #State SeparatedState 10 128 128 400 360 840 360 Terran_Marine 25 Zerg_Zergling 25
 

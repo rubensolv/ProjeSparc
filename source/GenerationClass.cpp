@@ -176,31 +176,43 @@ bool GenerationClass::unitsInMoves(GameState& state, const MoveArray& moves) {
 void GenerationClass::controlUnitsForAB(GameState & state, const MoveArray & moves) {
     int numUnits = 4;
     //verifico se as unidades não foram mortas
+    std::cout<<" ***************************************** " << std::endl;
+    std::cout<<" iniciando limpeza das unidades controladas " << std::endl;
     for (auto & un : _unitAbsAB) {
         if (!(state.unitExist(_playerID, un.ID()))) {
             _unitAbsAB.erase(un);
         }
     }
-
+    std::cout<<" Fim limpeza das unidades controladas " << std::endl;
+    
+    std::cout<<" iniciando Controle das unidades adicionadas " << std::endl;
     if (state.numUnits(_playerID) <= numUnits) {
+        std::cout<<" Adicionando todas as unidades para controle " << std::endl;
         _unitAbsAB.clear();
         //adiciono todas as unidades para serem controladas pelo AB
         for (int u(0); u < state.numUnits(_playerID); ++u) {
             _unitAbsAB.insert(state.getUnit(_playerID, u));
         }
+        std::cout<<" FIM Adicionando todas as unidades para controle " << std::endl;
     } else if (!(_unitAbsAB.size() == numUnits)) {
+        
         if ((state.numUnits(_playerID) < 2 or moves.numUnits() < 2)
                 and _unitAbsAB.size() == 0) {
+            std::cout<<" Adicionado apenas a unidade 0 para controle " << std::endl;
             _unitAbsAB.insert(state.getUnit(_playerID, 0));
         } else {
             int control = 0;
+            std::cout<<" Adicionando todas as unidades até o limite  " << std::endl;
             while (_unitAbsAB.size() < numUnits and control < 10) {
                 _unitAbsAB.insert(state.getUnit(_playerID, rand() % state.numUnits(_playerID)));
                 control++;
+                std::cout<<"Valor control =  "<< control << " Size do set = "<< _unitAbsAB.size() << std::endl;
             }
+            std::cout<<" FIM todas as unidades até o limite  " << std::endl;
         }
     }
-
+    std::cout<<" Fim Controle das unidades adicionadas " << std::endl;
+    std::cout<<" FIM ***************************************** " << std::endl;
 
 
 }
