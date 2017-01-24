@@ -18,7 +18,7 @@
 
 namespace SparCraft
 {
-
+    
 class Game;
 class AlphaBetaSearchParameters;
 class Player;

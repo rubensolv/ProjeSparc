@@ -536,7 +536,7 @@ else if (playerModelID == PlayerModels::ImprovedPortfolioGreedySearch)
     else if (playerModelID == PlayerModels::PortfolioOnlineEvolution)
     {
         std::string enemyPlayerModel;
-        size_t timeLimit(80);
+        size_t timeLimit(50);
         int iterations(1);
         int responses(0);
 

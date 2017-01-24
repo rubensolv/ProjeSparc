@@ -6,8 +6,11 @@ using namespace SparCraft;
 GenerationClass::GenerationClass(const IDType& playerID) {
     _playerID = playerID;
     iniciarAlphaBeta();
-    pgs = new PortfolioGreedySearch(_playerID, PlayerModels::NOKDPS, 1, 0, 40);
+    pgs = new PortfolioGreedySearch(_playerID, PlayerModels::NOKDPS, 1, 0, 25);
+    lastTime = 0;
 }
+
+
 
 void GenerationClass::getMoves(GameState& state, const MoveArray& moves, std::vector<Action>& moveVec) {
     
@@ -16,6 +19,11 @@ void GenerationClass::getMoves(GameState& state, const MoveArray& moves, std::ve
     moveVec.clear();
     UnitScriptData currentScriptData;
     //state.print();
+    if(lastTime > state.getTime()){
+        _unitAbsAB.clear();
+    }
+    lastTime = state.getTime();
+    
 
     //estado que será utilizado para simular as variações necessárias do AB
     GameState newState;
@@ -68,7 +76,11 @@ void GenerationClass::getMoves(GameState& state, const MoveArray& moves, std::ve
 
         if (unitsInMoves(state, moves)) {
             //Executo o AB
-            alphaBeta->doSearchWithMoves(state, currentScriptData, _unitAbsAB);
+            std::set<Unit> unitAbsAB;
+            for(auto & un : _unitAbsAB){
+                unitAbsAB.insert(un);
+            }
+            alphaBeta->doSearchWithMoves(state, currentScriptData, unitAbsAB);
             movecAB.assign(alphaBeta->getResults().bestMoves.begin(), alphaBeta->getResults().bestMoves.end());
 
             //tentativa de utilizar o playout para julgar qual seria a melhor execução Ab-PGS ou PGS.
@@ -176,44 +188,33 @@ bool GenerationClass::unitsInMoves(GameState& state, const MoveArray& moves) {
 void GenerationClass::controlUnitsForAB(GameState & state, const MoveArray & moves) {
     int numUnits = 4;
     //verifico se as unidades não foram mortas
-    std::cout<<" ***************************************** " << std::endl;
-    std::cout<<" iniciando limpeza das unidades controladas " << std::endl;
+    std::set<Unit, lex_compare> tempUnitAbsAB;
     for (auto & un : _unitAbsAB) {
-        if (!(state.unitExist(_playerID, un.ID()))) {
-            _unitAbsAB.erase(un);
+        if (state.unitExist(_playerID, un.ID()))  {
+            tempUnitAbsAB.insert(un);
         }
     }
-    std::cout<<" Fim limpeza das unidades controladas " << std::endl;
+    _unitAbsAB = tempUnitAbsAB;
     
-    std::cout<<" iniciando Controle das unidades adicionadas " << std::endl;
     if (state.numUnits(_playerID) <= numUnits) {
-        std::cout<<" Adicionando todas as unidades para controle " << std::endl;
         _unitAbsAB.clear();
         //adiciono todas as unidades para serem controladas pelo AB
         for (int u(0); u < state.numUnits(_playerID); ++u) {
             _unitAbsAB.insert(state.getUnit(_playerID, u));
         }
-        std::cout<<" FIM Adicionando todas as unidades para controle " << std::endl;
     } else if (!(_unitAbsAB.size() == numUnits)) {
         
         if ((state.numUnits(_playerID) < 2 or moves.numUnits() < 2)
                 and _unitAbsAB.size() == 0) {
-            std::cout<<" Adicionado apenas a unidade 0 para controle " << std::endl;
             _unitAbsAB.insert(state.getUnit(_playerID, 0));
         } else {
             int control = 0;
-            std::cout<<" Adicionando todas as unidades até o limite  " << std::endl;
-            while (_unitAbsAB.size() < numUnits and control < 10) {
+            while (_unitAbsAB.size() < numUnits and control < 20) {
                 _unitAbsAB.insert(state.getUnit(_playerID, rand() % state.numUnits(_playerID)));
                 control++;
-                std::cout<<"Valor control =  "<< control << " Size do set = "<< _unitAbsAB.size() << std::endl;
             }
-            std::cout<<" FIM todas as unidades até o limite  " << std::endl;
         }
     }
-    std::cout<<" Fim Controle das unidades adicionadas " << std::endl;
-    std::cout<<" FIM ***************************************** " << std::endl;
-
 
 }
 
@@ -772,7 +773,7 @@ void GenerationClass::iniciarAlphaBeta() {
 
     // set the parameters from the options in the file
     params.setMaxPlayer(_playerID);
-    params.setTimeLimit(40);
+    params.setTimeLimit(25);
     params.setMaxChildren(0);
     params.setMoveOrderingMethod(moveOrderingID);
     params.setEvalMethod(evalMethodID);
