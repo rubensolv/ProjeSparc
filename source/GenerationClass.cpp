@@ -6,7 +6,7 @@ using namespace SparCraft;
 GenerationClass::GenerationClass(const IDType& playerID) {
     _playerID = playerID;
     iniciarAlphaBeta();
-    pgs = new PortfolioGreedySearch(_playerID, PlayerModels::NOKDPS, 1, 0, 25);
+    pgs = new PortfolioGreedySearchNoTime(_playerID, PlayerModels::NOKDPS, 1, 0, 40);
     lastTime = 0;
 }
 
@@ -18,6 +18,7 @@ void GenerationClass::getMoves(GameState& state, const MoveArray& moves, std::ve
     t.start();
     moveVec.clear();
     UnitScriptData currentScriptData;
+    double ms;
     //state.print();
     if(lastTime > state.getTime()){
         _unitAbsAB.clear();
@@ -63,8 +64,11 @@ void GenerationClass::getMoves(GameState& state, const MoveArray& moves, std::ve
 
 
         //obtenho os movimentos sugeridos pelo PGS
+        ms = t.getElapsedTimeInMilliSec();
         currentScriptData = pgs->searchForScripts(_playerID, state);
-
+        ms = t.getElapsedTimeInMilliSec() - ms;
+        //std::cout << " Tempo total do PGS "<< ms << std::endl;
+        
         controlUnitsForAB(state, moves);
         
         std::vector<Action> moveVecPgs, movecAB;
@@ -74,13 +78,15 @@ void GenerationClass::getMoves(GameState& state, const MoveArray& moves, std::ve
         GameState copy(state);
         currentScriptData.calculateMoves(_playerID, movesPGS, copy, moveVecPgs);
 
-        if (unitsInMoves(state, moves)) {
+        if (unitsInMoves(state, moves) and ((40-ms)> 4) ) {
             //Executo o AB
             std::set<Unit> unitAbsAB;
             for(auto & un : _unitAbsAB){
                 unitAbsAB.insert(un);
             }
-            alphaBeta->doSearchWithMoves(state, currentScriptData, unitAbsAB);
+            //std::cout << " Tempo total para AB "<< 40 - ms << std::endl;
+            alphaBeta->setLimitTime(40 - ms);
+            alphaBeta->doSearchWithMoves(state, currentScriptData, unitAbsAB, _playerID);
             movecAB.assign(alphaBeta->getResults().bestMoves.begin(), alphaBeta->getResults().bestMoves.end());
 
             //tentativa de utilizar o playout para julgar qual seria a melhor execução Ab-PGS ou PGS.
@@ -126,6 +132,7 @@ void GenerationClass::getMoves(GameState& state, const MoveArray& moves, std::ve
             if (gABPGS.getState().eval(_playerID, SparCraft::EvaluationMethods::LTD2) >
                     gPGS.getState().eval(_playerID, SparCraft::EvaluationMethods::LTD2)) {
                 moveVec.assign(alphaBeta->getResults().bestMoves.begin(), alphaBeta->getResults().bestMoves.end());
+                std::cout<<"Escolhemos o ABPGS"<<std::endl;
             } else {
                 moveVec = moveVecPgs;
             }
@@ -133,9 +140,6 @@ void GenerationClass::getMoves(GameState& state, const MoveArray& moves, std::ve
         } else {
             moveVec = moveVecPgs;
         }
-
-
-
 
     }
 
@@ -149,8 +153,8 @@ void GenerationClass::getMoves(GameState& state, const MoveArray& moves, std::ve
     std::cout << "************* FIM GenerationClass  **************" << std::endl;
     std::cout << "##################################################" << std::endl;
      */
-    double ms = t.getElapsedTimeInMilliSec();
-    //printf("\nGenerationClass   First Part %lf ms\n", ms);
+    ms = t.getElapsedTimeInMilliSec();
+    //printf("\nGenerationClass   Execução completa %lf ms\n", ms);
 
 
     /*

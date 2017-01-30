@@ -15,7 +15,7 @@ namespace SparCraft
 	
 typedef	std::shared_ptr<Player> PlayerPtr;
 
-class PortfolioOnlineEvolution
+class PortfolioOnlineEvolutionLimit
 {
 protected:
 	
@@ -38,13 +38,14 @@ protected:
     void						crossover(const IDType & player, const GameState & state, std::vector<PortfolioOnlineGenome> & population);
     void						select(const IDType & player, const GameState & state, std::vector<PortfolioOnlineGenome> & population);
     std::vector<Action>     	getMoveVec(const IDType & player,const GameState & state,const std::vector<IDType> & playerScripts);
-    void              			evalPopulation(const IDType & player,const GameState & state, std::vector<PortfolioOnlineGenome> & population);
+    StateEvalScore         	evalPopulation(const IDType & player,const GameState & state, std::vector<PortfolioOnlineGenome> & population);
     IDType                      calculateInitialSeed(const IDType & player,const GameState & state);
 
 public:
 
-    PortfolioOnlineEvolution(const IDType & player, const IDType & enemyScript, const size_t & iter, const size_t & responses, const size_t & timeLimit);
+    PortfolioOnlineEvolutionLimit(const IDType & player, const IDType & enemyScript, const size_t & iter, const size_t & responses, const size_t & timeLimit);
     std::vector<Action> search(const IDType & player, const GameState & state);
+    UnitScriptData searchForScripts(const IDType & player, const GameState & state);
 };
 
 }

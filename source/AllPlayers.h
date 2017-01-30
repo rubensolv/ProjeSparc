@@ -26,6 +26,10 @@
 #include "Player_Cluster.h"
 #include "Player_Random.h"
 #include "GenerationClass.h"
+#include "ABPOEFixo.h"
+#include "ABPOELimit.h"
+#include "ABPGSSand.h"
+#include "ABPGSPlus.h"
 #include "Player_MoveForward.h"
 #include "Player_MoveBackward.h"
 

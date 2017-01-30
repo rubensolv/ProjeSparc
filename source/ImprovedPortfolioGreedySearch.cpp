@@ -12,7 +12,7 @@ ImprovedPortfolioGreedySearch::ImprovedPortfolioGreedySearch(const IDType & play
 {
 	_playerScriptPortfolio.push_back(PlayerModels::NOKDPS);
 	_playerScriptPortfolio.push_back(PlayerModels::KiterDPS);
-	_playerScriptPortfolio.push_back(PlayerModels::Cluster);
+	//_playerScriptPortfolio.push_back(PlayerModels::Cluster);
 //	_playerScriptPortfolio.push_back(PlayerModels::MoveForward);
 //	_playerScriptPortfolio.push_back(PlayerModels::MoveBackward);
 	//_playerScriptPortfolio.push_back(PlayerModels::AttackWeakest);
@@ -247,3 +247,55 @@ std::vector<Action> PortfolioGreedySparCraft::search(const IDType & player, cons
     currentScriptData.calculateMoves(player, moves, GameState(state), moveVec);
     return moveVec;
 }*/
+
+UnitScriptData ImprovedPortfolioGreedySearch::searchForScripts(const IDType & player, const GameState & state)
+{
+    Timer t;
+    t.start();
+
+    const IDType enemyPlayer(state.getEnemy(player));
+
+    // calculate the seed scripts for each player
+    // they will be used to seed the initial root search
+    IDType seedScript = calculateInitialSeed(player, state);
+    IDType enemySeedScript = calculateInitialSeed(enemyPlayer, state);
+
+    // set up the root script data
+    UnitScriptData originalScriptData;
+    setAllScripts(player, state, originalScriptData, seedScript);
+    setAllScripts(enemyPlayer, state, originalScriptData, enemySeedScript);
+
+    double ms = t.getElapsedTimeInMilliSec();
+  //  printf("\nInitial part was run in %lf ms\n", ms);
+
+
+    // do the initial root portfolio search for our player
+    UnitScriptData currentScriptData(originalScriptData);
+    doPortfolioSearch(player, state, currentScriptData, t);
+
+    //std::cout << "Number responses: " << _responses << std::endl;
+
+    // iterate as many times as required
+    for (size_t i(0); i<_responses; ++i)
+    {
+        // do the portfolio search to improve the enemy's scripts
+        doPortfolioSearch(enemyPlayer, state, currentScriptData, t);
+
+        // then do portfolio search again for us to improve vs. enemy's update
+        doPortfolioSearch(player, state, currentScriptData, t);
+    }
+
+ //   ms = t.getElapsedTimeInMilliSec();
+ //   printf("\nMove IPGS chosen in %lf ms\n", ms);
+ /*   _fileTime.open("IPGS.txt", std::ostream::app);
+    if (!_fileTime.is_open())
+    {
+    	std::cout << "ERROR Opening file" << std::endl;
+    }
+    _fileTime << ms << ", ";
+    _fileTime.close();
+*/
+    _totalEvals = 0;
+
+    return currentScriptData;
+}

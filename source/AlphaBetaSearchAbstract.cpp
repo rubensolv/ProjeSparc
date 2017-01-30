@@ -43,7 +43,7 @@ void AlphaBetaSearchAbstract::doSearch(GameState & initialState)
 
 	_results.timeElapsed = _searchTimer.getElapsedTimeInMilliSec();
 }
-void AlphaBetaSearchAbstract::doSearchWithMoves(GameState& initialState, UnitScriptData & UnitScriptData, std::set<Unit> & unitsAB){
+void AlphaBetaSearchAbstract::doSearchWithMoves(GameState& initialState, UnitScriptData & UnitScriptData, std::set<Unit> & unitsAB, IDType _playerID){
     _searchTimer.start();
         
 	StateEvalScore alpha(-10000000, 1000000);
@@ -53,17 +53,17 @@ void AlphaBetaSearchAbstract::doSearchWithMoves(GameState& initialState, UnitScr
         
 	if (_params.searchMethod() == SearchMethods::AlphaBeta)
 	{
-		val = alphaBetaWithPGS(initialState, _params.maxDepth(), Players::Player_None, NULL, alpha, beta, UnitScriptData, unitsAB);
+		val = alphaBetaWithPGS(initialState, _params.maxDepth(), Players::Player_None, NULL, alpha, beta, UnitScriptData, unitsAB, _playerID);
 	}
 	else if (_params.searchMethod() == SearchMethods::IDAlphaBeta)
 	{
-		val = IDAlphaBetaWithPGS(initialState, _params.maxDepth(), UnitScriptData, unitsAB);
+		val = IDAlphaBetaWithPGS(initialState, _params.maxDepth(), UnitScriptData, unitsAB, _playerID);
 	}
 
 	_results.timeElapsed = _searchTimer.getElapsedTimeInMilliSec();
 }
 
-AlphaBetaValue AlphaBetaSearchAbstract::IDAlphaBetaWithPGS(GameState & initialState, const size_t & maxDepth, UnitScriptData & UnitScriptData, std::set<Unit> & unitsAB)
+AlphaBetaValue AlphaBetaSearchAbstract::IDAlphaBetaWithPGS(GameState & initialState, const size_t & maxDepth, UnitScriptData & UnitScriptData, std::set<Unit> & unitsAB, IDType _playerID)
 {
 	AlphaBetaValue val;
 	_results.nodesExpanded = 0;
@@ -81,7 +81,7 @@ AlphaBetaValue AlphaBetaSearchAbstract::IDAlphaBetaWithPGS(GameState & initialSt
 		// perform ID-AB until time-out
 		try
 		{
-			val = alphaBetaWithPGS(initialState, d, Players::Player_None, NULL, alpha, beta, UnitScriptData, unitsAB);
+			val = alphaBetaWithPGS(initialState, d, Players::Player_None, NULL, alpha, beta, UnitScriptData, unitsAB, _playerID);
 
 			_results.bestMoves = val.abMove().moveVec();
 			_results.abValue = val.score().val();
@@ -434,7 +434,7 @@ const bool AlphaBetaSearchAbstract::isTranspositionLookupState(GameState & state
 	return !state.bothCanMove() || (state.bothCanMove() && !firstSimMove);
 }
 
-AlphaBetaValue AlphaBetaSearchAbstract::alphaBetaWithPGS(GameState & state, size_t depth, const IDType lastPlayerToMove, std::vector<Action> * prevSimMove, StateEvalScore alpha, StateEvalScore beta, UnitScriptData & UnitScriptData, std::set<Unit> & unitsAB )
+AlphaBetaValue AlphaBetaSearchAbstract::alphaBetaWithPGS(GameState & state, size_t depth, const IDType lastPlayerToMove, std::vector<Action> * prevSimMove, StateEvalScore alpha, StateEvalScore beta, UnitScriptData & UnitScriptData, std::set<Unit> & unitsAB, IDType _playerID )
 {
 	// update statistics
 	_results.nodesExpanded++;
@@ -485,7 +485,7 @@ AlphaBetaValue AlphaBetaSearchAbstract::alphaBetaWithPGS(GameState & state, size
         //obtenho os movimentos sugeridos pelo PGS
         MoveArray movesPgs;
         std::vector<Action> moveVecPgs;
-        if (playerToMove == 0) {
+        if (playerToMove == _playerID) {
             state.generateMoves(movesPgs, playerToMove);
             std::vector<Action> moveVecPgs;
             GameState copy(state);
@@ -521,7 +521,7 @@ AlphaBetaValue AlphaBetaSearchAbstract::alphaBetaWithPGS(GameState & state, size
         if (state.bothCanMove() && !prevSimMove && (depth != 1)) {
             firstMove = true;
             // don't generate a child yet, just pass on the move we are investigating
-            val = alphaBetaWithPGS(state, depth - 1, playerToMove, &moveVec, alpha, beta, UnitScriptData, unitsAB);
+            val = alphaBetaWithPGS(state, depth - 1, playerToMove, &moveVec, alpha, beta, UnitScriptData, unitsAB, _playerID);
         } else {
             firstMove = false;
 
@@ -536,7 +536,7 @@ AlphaBetaValue AlphaBetaSearchAbstract::alphaBetaWithPGS(GameState & state, size
             child.finishedMoving();
 
             // get the alpha beta value
-            val = alphaBetaWithPGS(child, depth - 1, playerToMove, NULL, alpha, beta, UnitScriptData, unitsAB);
+            val = alphaBetaWithPGS(child, depth - 1, playerToMove, NULL, alpha, beta, UnitScriptData, unitsAB, _playerID);
         }
 
         // set alpha or beta based on maxplayer

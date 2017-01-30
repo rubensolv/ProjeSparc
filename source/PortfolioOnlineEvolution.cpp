@@ -142,3 +142,46 @@ std::vector<Action> PortfolioOnlineEvolution::search(const IDType & player, cons
     return moveVec;
 }
 
+
+UnitScriptData PortfolioOnlineEvolution::searchForScripts(const IDType& player, const GameState& state){
+    Timer t;
+    t.start();
+
+    const IDType enemyPlayer(state.getEnemy(player));
+
+    double ms = t.getElapsedTimeInMilliSec();
+    //printf("\nFirst Part %lf ms\n", ms);
+
+    std::vector<PortfolioOnlineGenome> population;
+    init(player, state, population);
+
+    while(ms < this->_timeLimit)
+    {
+    	evalPopulation(player, state, population);
+    	select(player, state, population);
+    	mutatePopulation(player, state, population);
+    	//crossover(player, state, population);
+
+    	ms = t.getElapsedTimeInMilliSec();
+    }
+
+//    ms = t.getElapsedTimeInMilliSec();
+//    printf("\nMove POE chosen in %lf ms\n", ms);
+    
+    evalPopulation(player, state, population);
+    //population[0].
+    PortfolioOnlineGenome pop = population[0];
+    UnitScriptData currentScriptData;
+    
+    for (size_t unitIndex(0); unitIndex < state.numUnits(player); ++unitIndex)
+    {
+        currentScriptData.setUnitScript(state.getUnit(player, unitIndex), pop.getUnitScript(state.getUnit(player, unitIndex)));
+    }
+    
+    for (size_t unitIndex(0); unitIndex < state.numUnits(enemyPlayer); ++unitIndex)
+    {
+        currentScriptData.setUnitScript(state.getUnit(enemyPlayer, unitIndex), pop.getUnitScript(state.getUnit(enemyPlayer, unitIndex)));
+    }
+
+    return currentScriptData;
+}

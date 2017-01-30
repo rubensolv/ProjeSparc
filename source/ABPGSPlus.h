@@ -11,16 +11,16 @@
 #include "Player.h"
 #include "AlphaBetaSearchParameters.hpp"
 #include "AlphaBetaSearchAbstract.h"
-#include "PortfolioGreedySearch.h"
+#include "ImprovedPortfolioGreedySearchNoTime.h"
 
 class TranspositionTable;
 
 namespace SparCraft {
 
     class AlphaBetaSearchAbstract;
-    class PortfolioGreedySearch;
+    class ImprovedPortfolioGreedySearchNoTime;
     
-    struct lex_compare {
+    struct lex_comp {
 
         bool operator()(const Unit & lUn, const Unit & rUn) const {
             return lUn < rUn;
@@ -28,21 +28,19 @@ namespace SparCraft {
     };
     
 
-    class GenerationClass : public Player {
+    class ABPGSPlus : public Player {
         AlphaBetaSearchAbstract * alphaBeta;
-        PortfolioGreedySearch * pgs;
+        ImprovedPortfolioGreedySearchNoTime * pgs;
         std::map<Unit, std::vector<Unit>> _unAttack;
         std::vector<Unit> _UnReut;
-        std::set<Unit, lex_compare> _unitAbsAB;
+        std::set<Unit, lex_comp> _unitAbsAB;
         TimeType lastTime;
     public:
-        GenerationClass(const IDType & playerID);
+        ABPGSPlus(const IDType & playerID);
         void getMoves(GameState & state, const MoveArray & moves, std::vector<Action> & moveVec);
-        void getMoves3(GameState & state, const MoveArray & moves, std::vector<Action> & moveVec);
-        void getMoves2(GameState & state, const MoveArray & moves, std::vector<Action> & moveVec);
 
         IDType getType() {
-            return PlayerModels::Kiter;
+            return PlayerModels::ABPGSPlus;
         }
         void listaOrdenada(const IDType & playerID, const Unit & unidade, GameState & state, std::vector<Unit> & unidades);
         void listaOrdenadaForMoves(const IDType & playerID, const Unit & unidade, GameState & state, std::vector<Unit> & unidades, const MoveArray & moves);

@@ -1,8 +1,8 @@
-#include "PortfolioGreedySearch.h"
+#include "PortfolioGreedySearchNoTime.h"
 
 using namespace SparCraft;
 
-PortfolioGreedySearch::PortfolioGreedySearch(const IDType & player, const IDType & enemyScript, const size_t & iter, const size_t & responses, const size_t & timeLimit)
+PortfolioGreedySearchNoTime::PortfolioGreedySearchNoTime(const IDType & player, const IDType & enemyScript, const size_t & iter, const size_t & responses, const size_t & timeLimit)
 	: _player(player)
 	, _enemyScript(enemyScript)
 	, _iterations(iter)
@@ -12,11 +12,11 @@ PortfolioGreedySearch::PortfolioGreedySearch(const IDType & player, const IDType
 {
 	_playerScriptPortfolio.push_back(PlayerModels::NOKDPS);
 	_playerScriptPortfolio.push_back(PlayerModels::KiterDPS);
-	_playerScriptPortfolio.push_back(PlayerModels::Cluster);
+	//_playerScriptPortfolio.push_back(PlayerModels::Cluster);
 }
 
 
-UnitScriptData PortfolioGreedySearch::searchForScripts(const IDType & player, const GameState & state)
+UnitScriptData PortfolioGreedySearchNoTime::searchForScripts(const IDType & player, const GameState & state)
 {
     Timer t;
     t.start();
@@ -61,7 +61,7 @@ UnitScriptData PortfolioGreedySearch::searchForScripts(const IDType & player, co
     return  currentScriptData;
 }
 
-std::vector<Action> PortfolioGreedySearch::search(const IDType & player, const GameState & state)
+std::vector<Action> PortfolioGreedySearchNoTime::search(const IDType & player, const GameState & state)
 {
     Timer t;
     t.start();
@@ -120,7 +120,7 @@ std::vector<Action> PortfolioGreedySearch::search(const IDType & player, const G
     return moveVec;
 }
 
-void PortfolioGreedySearch::doPortfolioSearch(const IDType & player, const GameState & state, UnitScriptData & currentScriptData, Timer & t)
+void PortfolioGreedySearchNoTime::doPortfolioSearch(const IDType & player, const GameState & state, UnitScriptData & currentScriptData, Timer & t)
 {
   //  Timer t;
  //   t.start();
@@ -128,8 +128,8 @@ void PortfolioGreedySearch::doPortfolioSearch(const IDType & player, const GameS
     // the enemy of this player
     const IDType enemyPlayer(state.getEnemy(player));
     
-    while(t.getElapsedTimeInMilliSec() < _timeLimit)
-    //for (size_t i(0); i<_iterations; ++i)
+    //while(t.getElapsedTimeInMilliSec() < _timeLimit)
+    for (size_t i(0); i<_iterations; ++i)
     {
         // set up data for best scripts
         IDType          bestScriptVec[Constants::Max_Units];
@@ -168,7 +168,7 @@ void PortfolioGreedySearch::doPortfolioSearch(const IDType & player, const GameS
     }   
 }
 
-IDType PortfolioGreedySearch::calculateInitialSeed(const IDType & player, const GameState & state)
+IDType PortfolioGreedySearchNoTime::calculateInitialSeed(const IDType & player, const GameState & state)
 {
     IDType bestScript;
     StateEvalScore bestScriptScore;
@@ -204,19 +204,19 @@ IDType PortfolioGreedySearch::calculateInitialSeed(const IDType & player, const 
     return bestScript;
 }
 
-StateEvalScore PortfolioGreedySearch::eval(const IDType & player, const GameState & state, UnitScriptData & playerScriptsChosen)
+StateEvalScore PortfolioGreedySearchNoTime::eval(const IDType & player, const GameState & state, UnitScriptData & playerScriptsChosen)
 {
     const IDType enemyPlayer(state.getEnemy(player));
 
 	Game g(state, 100);
 
 	_totalEvals++;
-
-    g.playIndividualScripts(playerScriptsChosen);
-	return g.getState().eval(player, SparCraft::EvaluationMethods::LTD2);
+     return g.playLimitedIndividualScripts(player, playerScriptsChosen, 4);
+    //g.playIndividualScripts(playerScriptsChosen);
+	//return g.getState().eval(player, SparCraft::EvaluationMethods::LTD2);
 }
 
-void  PortfolioGreedySearch::setAllScripts(const IDType & player, const GameState & state, UnitScriptData & data, const IDType & script)
+void  PortfolioGreedySearchNoTime::setAllScripts(const IDType & player, const GameState & state, UnitScriptData & data, const IDType & script)
 {
     for (size_t unitIndex(0); unitIndex < state.numUnits(player); ++unitIndex)
     {
