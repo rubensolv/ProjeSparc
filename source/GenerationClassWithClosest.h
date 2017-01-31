@@ -20,7 +20,7 @@ namespace SparCraft {
     class AlphaBetaSearchAbstract;
     class PortfolioGreedySearchNoTime;
     
-    struct lex_compare {
+    struct lex_cc {
 
         bool operator()(const Unit & lUn, const Unit & rUn) const {
             return lUn < rUn;
@@ -28,18 +28,16 @@ namespace SparCraft {
     };
     
 
-    class GenerationClass : public Player {
+    class GenerationClassWithClosest : public Player {
         AlphaBetaSearchAbstract * alphaBeta;
         PortfolioGreedySearchNoTime * pgs;
         std::map<Unit, std::vector<Unit>> _unAttack;
         std::vector<Unit> _UnReut;
-        std::set<Unit, lex_compare> _unitAbsAB;
+        std::set<Unit, lex_cc> _unitAbsAB;
         TimeType lastTime;
     public:
-        GenerationClass(const IDType & playerID);
-        void getMoves(GameState & state, const MoveArray & moves, std::vector<Action> & moveVec);
-        void getMoves3(GameState & state, const MoveArray & moves, std::vector<Action> & moveVec);
-        void getMoves2(GameState & state, const MoveArray & moves, std::vector<Action> & moveVec);
+        GenerationClassWithClosest(const IDType & playerID);
+        void getMoves(GameState & state, const MoveArray & moves, std::vector<Action> & moveVec);        
 
         IDType getType() {
             return PlayerModels::GenerationClass;

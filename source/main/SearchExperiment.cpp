@@ -535,6 +535,18 @@ void SearchExperiment::addPlayer(const std::string & line)
     { 
         players[playerID].push_back(PlayerPtr(new ABPGSPlus(playerID)));
     }
+        else if (playerModelID == PlayerModels::ABPGSwithRepeatAction)				
+    { 
+        players[playerID].push_back(PlayerPtr(new ABPGSwithRepeatAction(playerID)));
+    }
+        else if (playerModelID == PlayerModels::ABPOELimitWithRepeatAction)				
+    { 
+        players[playerID].push_back(PlayerPtr(new ABPOELimitWithRepeatAction(playerID)));
+    }
+        else if (playerModelID == PlayerModels::GenerationClassWithClosest)				
+    { 
+        players[playerID].push_back(PlayerPtr(new GenerationClassWithClosest(playerID)));
+    }
 else if (playerModelID == PlayerModels::ImprovedPortfolioGreedySearch)
     {
         std::string enemyPlayerModel;

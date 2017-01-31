@@ -11,16 +11,18 @@
 #include "Player.h"
 #include "AlphaBetaSearchParameters.hpp"
 #include "AlphaBetaSearchAbstract.h"
-#include "ImprovedPortfolioGreedySearchNoTime.h"
+#include "PortfolioGreedySearchNoTime.h"
+#include "UnitScriptData.h"
 
 class TranspositionTable;
 
 namespace SparCraft {
 
     class AlphaBetaSearchAbstract;
-    class ImprovedPortfolioGreedySearchNoTime;
+    class PortfolioGreedySearchNoTime;
+    class UnitScriptData;
     
-    struct lex_comp {
+    struct lex_com {
 
         bool operator()(const Unit & lUn, const Unit & rUn) const {
             return lUn < rUn;
@@ -28,19 +30,21 @@ namespace SparCraft {
     };
     
 
-    class ABPGSPlus : public Player {
+    class ABPGSwithRepeatAction : public Player {
         AlphaBetaSearchAbstract * alphaBeta;
-        ImprovedPortfolioGreedySearchNoTime * pgs;
+        PortfolioGreedySearchNoTime * pgs;
         std::map<Unit, std::vector<Unit>> _unAttack;
         std::vector<Unit> _UnReut;
-        std::set<Unit, lex_comp> _unitAbsAB;
+        std::set<Unit, lex_com> _unitAbsAB;
         TimeType lastTime;
+        UnitScriptData * data;
+        int _controlScriptRepeat;
     public:
-        ABPGSPlus(const IDType & playerID);
+        ABPGSwithRepeatAction(const IDType & playerID);
         void getMoves(GameState & state, const MoveArray & moves, std::vector<Action> & moveVec);
 
         IDType getType() {
-            return PlayerModels::ABPGSPlus;
+            return PlayerModels::ABPGSwithRepeatAction;
         }
         void listaOrdenada(const IDType & playerID, const Unit & unidade, GameState & state, std::vector<Unit> & unidades);
         void listaOrdenadaForMoves(const IDType & playerID, const Unit & unidade, GameState & state, std::vector<Unit> & unidades, const MoveArray & moves);

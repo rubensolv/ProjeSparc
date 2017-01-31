@@ -77,12 +77,15 @@ Player 1 PortfolioOnlineEvolution 40 NOKDPS 1 0
 #Player 1 IRStratifiedPolicySearch 40 NOKDPS 1 0
 
 # Sample Scripted Players
-#Player 0 GenerationClass
+Player 0 GenerationClass
 #Player 0 ABPOEFixo
 #Player 0 ABPOELimit
-Player 0 ABPGSPlus
+#Player 0 ABPGSPlus
 #Player 1 Kiter
 #Player 0 ABPGSSand
+#Player 0 ABPGSwithRepeatAction
+#Player 0 ABPOELimitWithRepeatAction
+#Player 0 GenerationClassWithClosest
 
 ####################################################
 #
@@ -116,17 +119,17 @@ Player 0 ABPGSPlus
 #State StateDescriptionFile 10 PATH_TO\sample_state.txt
 
 # Sample SeparatedState States
-#State SeparatedState 2 128 128 400 360 840 360 Protoss_Dragoon 20
+State SeparatedState 100 128 128 400 360 840 360 Protoss_Dragoon 20
+#State SeparatedState 100 128 128 400 360 840 360 Zerg_Zergling 15 Protoss_Dragoon 8
+#State SeparatedState 100 128 128 400 360 840 360 Protoss_Dragoon 4 Terran_Marine 4
+#State SeparatedState 100 128 128 400 360 840 360 Protoss_Dragoon 8 Protoss_Zealot 8
 #State SeparatedState 2 128 128 400 360 840 360 Zerg_Zergling 20
-State SeparatedState 10 128 128 400 360 840 360 Protoss_Dragoon 25 Protoss_Zealot 25
+#State SeparatedState 10 128 128 400 360 840 360 Protoss_Dragoon 25 Protoss_Zealot 25
 #State SeparatedState 2 128 128 400 360 840 360 Protoss_Dragoon 25 Terran_Marine 25
 #State SeparatedState 2 128 128 400 360 840 360 Terran_Marine 25 Zerg_Zergling 25
 #State SeparatedState 2 128 128 400 360 840 360 Protoss_Zealot 32
 #State SeparatedState 50 128 128 400 360 840 360 Protoss_Dragoon 14 Protoss_Zealot 14 Zerg_Zergling 14 Terran_Marine 14
-#State SeparatedState 2 128 128 400 360 840 360 Zerg_Zergling 15 Protoss_Dragoon 8
 #State SeparatedState 2 128 128 400 360 840 360 Protoss_Dragoon 32 Protoss_Zealot 32
-#State SeparatedState 2 128 128 400 360 840 360 Protoss_Dragoon 4 Terran_Marine 4
-#State SeparatedState 2 128 128 400 360 840 360 Protoss_Dragoon 8 Protoss_Zealot 8
 #State SeparatedState 2 128 128 400 360 840 360 Protoss_Zealot 16 Protoss_Dragoon 16
 #State SeparatedState 2 128 128 400 360 840 360 Terran_Marine 25 Zerg_Zergling 25
 
@@ -175,4 +178,4 @@ ResultsFile PATH_TO\sample_exp true
 #
 ##################################################
 
-Display true PATH_TO\starcraft_images\
+Display false PATH_TO\starcraft_images\

@@ -12,6 +12,7 @@
 #include "AlphaBetaSearchParameters.hpp"
 #include "AlphaBetaSearchAbstract.h"
 #include "PortfolioOnlineEvolutionLimit.h"
+#include "UnitScriptData.h"
 
 class TranspositionTable;
 
@@ -19,8 +20,9 @@ namespace SparCraft {
 
     class AlphaBetaSearchAbstract;
     class PortfolioOnlineEvolutionLimit;
+    class UnitScriptData;
     
-    struct lex_compare_PoeL {
+    struct lex_c {
 
         bool operator()(const Unit & lUn, const Unit & rUn) const {
             return lUn < rUn;
@@ -28,19 +30,21 @@ namespace SparCraft {
     }; 
     
 
-    class ABPOELimit : public Player {
+    class ABPOELimitWithRepeatAction : public Player {
         AlphaBetaSearchAbstract * alphaBeta;
         PortfolioOnlineEvolutionLimit * poe;
         std::map<Unit, std::vector<Unit>> _unAttack;
         std::vector<Unit> _UnReut;
-        std::set<Unit, lex_compare_PoeL> _unitAbsAB;
+        std::set<Unit, lex_c> _unitAbsAB;
         TimeType lastTime;
+        UnitScriptData * data;
+        int _controlScriptRepeat;
     public:
-        ABPOELimit(const IDType & playerID);
+        ABPOELimitWithRepeatAction(const IDType & playerID);
         void getMoves(GameState & state, const MoveArray & moves, std::vector<Action> & moveVec);
 
         IDType getType() {
-            return PlayerModels::ABPOELimit;
+            return PlayerModels::ABPOELimitWithRepeatAction;
         }
         void listaOrdenada(const IDType & playerID, const Unit & unidade, GameState & state, std::vector<Unit> & unidades);
         void listaOrdenadaForMoves(const IDType & playerID, const Unit & unidade, GameState & state, std::vector<Unit> & unidades, const MoveArray & moves);

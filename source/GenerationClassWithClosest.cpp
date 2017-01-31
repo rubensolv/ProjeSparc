@@ -1,30 +1,27 @@
 
-#include "GenerationClass.h"
+#include "GenerationClassWithClosest.h"
 
 using namespace SparCraft;
 
-GenerationClass::GenerationClass(const IDType& playerID) {
+GenerationClassWithClosest::GenerationClassWithClosest(const IDType& playerID) {
     _playerID = playerID;
     iniciarAlphaBeta();
     pgs = new PortfolioGreedySearchNoTime(_playerID, PlayerModels::NOKDPS, 1, 0, 40);
     lastTime = 0;
 }
 
-
-
-void GenerationClass::getMoves(GameState& state, const MoveArray& moves, std::vector<Action>& moveVec) {
-    
+void GenerationClassWithClosest::getMoves(GameState& state, const MoveArray& moves, std::vector<Action>& moveVec) {
     Timer t;
     t.start();
     moveVec.clear();
     UnitScriptData currentScriptData;
     double ms;
     //state.print();
-    if(lastTime > state.getTime()){
+    if (lastTime > state.getTime()) {
         _unitAbsAB.clear();
     }
     lastTime = state.getTime();
-    
+
 
     //estado que será utilizado para simular as variações necessárias do AB
     GameState newState;
@@ -42,106 +39,86 @@ void GenerationClass::getMoves(GameState& state, const MoveArray& moves, std::ve
     //incluído para validação da inicializacao
     listaOrdenada(state.getEnemy(_playerID), ourUnit, state, unidadesInimigas);
 
-    //início validação por movimentação
-    if (applyClosestInicialization(unidadesAliadas, unidadesInimigas, state)) {
-        //criar abstração com todas as unidades aliadas contra a centróide do exército inimigo
-        // for este tipo de inicialização indico o alpha-beta com 40 ms
-        alphaBeta->setLimitTime(40);
-        //adiciono todas as unidades aliadas
-        for (auto & un : unidadesAliadas) {
-            newState.addUnitWithID(un);
+
+    //obtenho os movimentos sugeridos pelo PGS
+    ms = t.getElapsedTimeInMilliSec();
+    currentScriptData = pgs->searchForScripts(_playerID, state);
+    ms = t.getElapsedTimeInMilliSec() - ms;
+    //std::cout << " Tempo total do PGS "<< ms << std::endl;
+
+    controlUnitsForAB(state, moves);
+
+    std::vector<Action> moveVecPgs, movecAB;
+
+    MoveArray movesPGS;
+    state.generateMoves(movesPGS, _playerID);
+    GameState copy(state);
+    currentScriptData.calculateMoves(_playerID, movesPGS, copy, moveVecPgs);
+
+    if (unitsInMoves(state, moves) and ((40 - ms) > 4)) {
+        //Executo o AB
+        std::set<Unit> unitAbsAB;
+        for (auto & un : _unitAbsAB) {
+            unitAbsAB.insert(un);
         }
-        //Seleciono a unidade com base na média das distancias euclidianas.
-        newState.addUnitWithID(getCalculateEnemy(newState, unidadesInimigas));
+        //std::cout << " Tempo total para AB "<< 40 - ms << std::endl;
+        alphaBeta->setLimitTime(40 - ms);
+        alphaBeta->doSearchWithMoves(state, currentScriptData, unitAbsAB, _playerID);
+        movecAB.assign(alphaBeta->getResults().bestMoves.begin(), alphaBeta->getResults().bestMoves.end());
 
-        //aplico AB
-        doAlphaBeta(newState, moveVec, state);
+        //tentativa de utilizar o playout para julgar qual seria a melhor execução Ab-PGS ou PGS.
+        UnitScriptData baseScriptData;
+        const IDType enemyPlayer(state.getEnemy(_playerID));
+        //inicializar o baseScriptData com NO-KDPS
+        //Player
+        for (size_t unitIndex(0); unitIndex < state.numUnits(_playerID); ++unitIndex) {
+            baseScriptData.setUnitScript(state.getUnit(_playerID, unitIndex), SparCraft::PlayerModels::NOKDPS);
+        }
+        //Enemy
+        for (size_t unitIndex(0); unitIndex < state.numUnits(enemyPlayer); ++unitIndex) {
+            baseScriptData.setUnitScript(state.getUnit(enemyPlayer, unitIndex), SparCraft::PlayerModels::NOKDPS);
+        }
 
-        //limpo o state por segurança        
-        copiarStateCleanUnit(state, newState);
+        std::vector<Action> moveVecPgsEnemy;
+        if (state.bothCanMove()) {
+            //gero os movimentos inimigos
+            MoveArray movesPGSEnemy;
+            state.generateMoves(movesPGSEnemy, enemyPlayer);
+            GameState copy2(state);
+            baseScriptData.calculateMoves(enemyPlayer, movesPGSEnemy, copy2, moveVecPgsEnemy);
+        }
 
-    } else {
+        //Execução AB-PGS
+        Game gABPGS(state, 50);
+        gABPGS.getState().makeMoves(movecAB);
+        if (gABPGS.getState().bothCanMove()) {
+            gABPGS.getState().makeMoves(moveVecPgsEnemy);
+        }
+        gABPGS.getState().finishedMoving();
+        gABPGS.playIndividualScripts(baseScriptData);
 
+        //Execução PGS
+        Game gPGS(state, 50);
+        gPGS.getState().makeMoves(moveVecPgs);
+        if (gPGS.getState().bothCanMove()) {
+            gPGS.getState().makeMoves(moveVecPgsEnemy);
+        }
+        gPGS.getState().finishedMoving();
+        gPGS.playIndividualScripts(baseScriptData);
 
-        //obtenho os movimentos sugeridos pelo PGS
-        ms = t.getElapsedTimeInMilliSec();
-        currentScriptData = pgs->searchForScripts(_playerID, state);
-        ms = t.getElapsedTimeInMilliSec() - ms;
-        //std::cout << " Tempo total do PGS "<< ms << std::endl;
-        
-        controlUnitsForAB(state, moves);
-        
-        std::vector<Action> moveVecPgs, movecAB;
-
-        MoveArray movesPGS;
-        state.generateMoves(movesPGS, _playerID);
-        GameState copy(state);
-        currentScriptData.calculateMoves(_playerID, movesPGS, copy, moveVecPgs);
-
-        if (unitsInMoves(state, moves) and ((40-ms)> 4) ) {
-            //Executo o AB
-            std::set<Unit> unitAbsAB;
-            for(auto & un : _unitAbsAB){
-                unitAbsAB.insert(un);
-            }
-            //std::cout << " Tempo total para AB "<< 40 - ms << std::endl;
-            alphaBeta->setLimitTime(40 - ms);
-            alphaBeta->doSearchWithMoves(state, currentScriptData, unitAbsAB, _playerID);
-            movecAB.assign(alphaBeta->getResults().bestMoves.begin(), alphaBeta->getResults().bestMoves.end());
-
-            //tentativa de utilizar o playout para julgar qual seria a melhor execução Ab-PGS ou PGS.
-            UnitScriptData baseScriptData;
-            const IDType enemyPlayer(state.getEnemy(_playerID));
-            //inicializar o baseScriptData com NO-KDPS
-            //Player
-            for (size_t unitIndex(0); unitIndex < state.numUnits(_playerID); ++unitIndex) {
-                baseScriptData.setUnitScript(state.getUnit(_playerID, unitIndex), SparCraft::PlayerModels::NOKDPS);
-            }
-            //Enemy
-            for (size_t unitIndex(0); unitIndex < state.numUnits(enemyPlayer); ++unitIndex) {
-                baseScriptData.setUnitScript(state.getUnit(enemyPlayer, unitIndex), SparCraft::PlayerModels::NOKDPS);
-            }
-
-            std::vector<Action> moveVecPgsEnemy;
-            if(state.bothCanMove()){
-                //gero os movimentos inimigos
-                MoveArray movesPGSEnemy;
-                state.generateMoves(movesPGSEnemy, enemyPlayer);
-                GameState copy2(state);
-                baseScriptData.calculateMoves(enemyPlayer,movesPGSEnemy, copy2, moveVecPgsEnemy);
-            }
-            
-            //Execução AB-PGS
-            Game gABPGS(state, 50);
-            gABPGS.getState().makeMoves(movecAB);
-            if(gABPGS.getState().bothCanMove()){
-                gABPGS.getState().makeMoves(moveVecPgsEnemy);
-            }
-            gABPGS.getState().finishedMoving();
-            gABPGS.playIndividualScripts(baseScriptData);
-
-            //Execução PGS
-            Game gPGS(state, 50);
-            gPGS.getState().makeMoves(moveVecPgs);
-            if(gPGS.getState().bothCanMove()){
-                gPGS.getState().makeMoves(moveVecPgsEnemy);
-            }
-            gPGS.getState().finishedMoving();
-            gPGS.playIndividualScripts(baseScriptData);
-            
-            if (gABPGS.getState().eval(_playerID, SparCraft::EvaluationMethods::LTD2) >
-                    gPGS.getState().eval(_playerID, SparCraft::EvaluationMethods::LTD2)) {
-                moveVec.assign(alphaBeta->getResults().bestMoves.begin(), alphaBeta->getResults().bestMoves.end());
-                std::cout<<"Escolhemos o ABPGS"<<std::endl;
-            } else {
-                moveVec = moveVecPgs;
-            }
-
+        if (gABPGS.getState().eval(_playerID, SparCraft::EvaluationMethods::LTD2) >
+                gPGS.getState().eval(_playerID, SparCraft::EvaluationMethods::LTD2)) {
+            moveVec.assign(alphaBeta->getResults().bestMoves.begin(), alphaBeta->getResults().bestMoves.end());
+            std::cout << "Escolhemos o ABPGS" << std::endl;
         } else {
             moveVec = moveVecPgs;
         }
 
+    } else {
+        moveVec = moveVecPgs;
     }
+
+
 
 
 
@@ -170,10 +147,10 @@ void GenerationClass::getMoves(GameState& state, const MoveArray& moves, std::ve
     std::cout<<"************* FIM GenerationClass PGS **************"<<std::endl;
     std::cout<<"##################################################"<<std::endl;
      */
-    
+
 }
 
-bool GenerationClass::unitsInMoves(GameState& state, const MoveArray& moves) {
+bool GenerationClassWithClosest::unitsInMoves(GameState& state, const MoveArray& moves) {
     for (size_t unitIndex(0); unitIndex < moves.numUnits(); ++unitIndex) {
         const Unit & unit = state.getUnit(_playerID, unitIndex);
         for (auto & un : _unitAbsAB) {
@@ -189,166 +166,48 @@ bool GenerationClass::unitsInMoves(GameState& state, const MoveArray& moves) {
 //separo as unidades que serão utilizadas para compor a abstração que será utilizada no AB
 //e faço controle e manutenção destas
 
-void GenerationClass::controlUnitsForAB(GameState & state, const MoveArray & moves) {
+void GenerationClassWithClosest::controlUnitsForAB(GameState & state, const MoveArray & moves) {
     int numUnits = 4;
+    Unit ourUnit;
+    
     //verifico se as unidades não foram mortas
-    std::set<Unit, lex_compare> tempUnitAbsAB;
-    for (auto & un : _unitAbsAB) {
-        if (state.unitExist(_playerID, un.ID()))  {
-            tempUnitAbsAB.insert(un);
+    std::set<Unit, lex_cc> tempUnitAbsAB;
+    if (_unitAbsAB.size() > 0) {
+        for (auto & un : _unitAbsAB) {
+            if (state.unitExist(_playerID, un.ID())) {
+                tempUnitAbsAB.insert(un);
+            }
         }
+        _unitAbsAB = tempUnitAbsAB;
+    }else if (_unitAbsAB.size() == 0){
+        ourUnit = state.getUnit(_playerID, (rand() % state.numUnits(_playerID)) );
     }
-    _unitAbsAB = tempUnitAbsAB;
     
-    if (state.numUnits(_playerID) <= numUnits) {
-        _unitAbsAB.clear();
-        //adiciono todas as unidades para serem controladas pelo AB
-        for (int u(0); u < state.numUnits(_playerID); ++u) {
-            _unitAbsAB.insert(state.getUnit(_playerID, u));
+    if(_unitAbsAB.size() < numUnits){
+        std::vector<Unit> unidadesAliadas;
+        listaOrdenadaForMoves(_playerID, ourUnit, state, unidadesAliadas, moves);
+        for(auto & ut : unidadesAliadas){
+            ut.print();
         }
-    } else if (!(_unitAbsAB.size() == numUnits)) {
         
-        if ((state.numUnits(_playerID) < 2 or moves.numUnits() < 2)
-                and _unitAbsAB.size() == 0) {
-            _unitAbsAB.insert(state.getUnit(_playerID, 0));
-        } else {
-            int control = 0;
-            while (_unitAbsAB.size() < numUnits and control < 20) {
-                _unitAbsAB.insert(state.getUnit(_playerID, rand() % state.numUnits(_playerID)));
-                control++;
+        for(auto & unt : unidadesAliadas){
+            if(_unitAbsAB.size() >= numUnits or _unitAbsAB.size() == state.numUnits(_playerID)){
+                break;
             }
+            _unitAbsAB.insert(unt);
         }
     }
-
-}
-
-void GenerationClass::getMoves3(GameState& state, const MoveArray& moves, std::vector<Action>& moveVec) {
-    //estado que será utilizado para simular as variações necessárias do AB
-    GameState newState;
-    //vetores ordenados por distancia que conterão as unidades
-    std::vector<Unit> unidadesAliadas;
-    std::vector<Unit> unidadesInimigas;
-    moveVec.clear();
-    _unAttack.clear();
-
-    //obtem nossa unidade inicial.
-    const Unit & ourUnit(state.getUnit(_playerID, (0)));
-
-    listaOrdenadaForMoves(_playerID, ourUnit, state, unidadesAliadas, moves);
-
-    //incluído para validação da inicializacao
-    listaOrdenada(state.getEnemy(_playerID), ourUnit, state, unidadesInimigas);
-
-    //início validação por movimentação
-    if (applyClosestInicialization(unidadesAliadas, unidadesInimigas, state)) {
-        //criar abstração com todas as unidades aliadas contra a centróide do exército inimigo
-        // for este tipo de inicialização indico o alpha-beta com 40 ms
-        alphaBeta->setLimitTime(40);
-        //adiciono todas as unidades aliadas
-        for (auto & un : unidadesAliadas) {
-            newState.addUnitWithID(un);
-        }
-        //Seleciono a unidade com base na média das distancias euclidianas.
-        newState.addUnitWithID(getCalculateEnemy(newState, unidadesInimigas));
-
-        //aplico AB
-        doAlphaBeta(newState, moveVec, state);
-
-        //limpo o state por segurança        
-        copiarStateCleanUnit(state, newState);
-
-
-    } else {
-
-        int qtdUnPlayerAbstr = 4;
-        int control = 0;
-        //calculo o tempo com base no número de abstrações que serão montadas
-        int timeLim = ceilf(moves.numUnits() / qtdUnPlayerAbstr);
-        if (timeLim < 1) {
-            timeLim = 1;
-        }
-        alphaBeta->setLimitTime(40 / timeLim);
-
-        for (auto & un : unidadesAliadas) {
-            control++;
-            //para mudanças na forma de escolha das unidades associadas
-            if (newState.numUnits(_playerID) == 0) {
-                listaOrdenada(state.getEnemy(_playerID), un, state, unidadesInimigas);
-            }
-            if (!(_UnReut.empty())) {
-                //adiciono as unidades à abstração
-                for (auto & un : _UnReut) {
-                    if (!newState.unitExist(_playerID, un.ID())) {
-                        newState.addUnitWithID(un);
-                    }
-                }
-                _UnReut.clear();
-            }
-            if (qtdUnPlayerAbstr != newState.numUnits(_playerID)) {
-                //adiciono o número de unidades que desejamos na abstração
-                if (!newState.unitExist(_playerID, un.ID())) {
-                    newState.addUnitWithID(un);
-                }
-            }
-            if (qtdUnPlayerAbstr == newState.numUnits(_playerID)
-                    or unidadesAliadas.size() == control) {
-
-                //newState.addUnitWithID(getEnemyClosestvalid(newState, unidadesInimigas));
-                newState.addUnitWithID(getCalculateEnemy(newState, unidadesInimigas));
-
-                //análise de inclusão de outras unidades inimigas na abstração
-                addMoreEnemy(newState, unidadesInimigas);
-
-                //análise pós abstract
-                //analisarAbstractForm(newState, unidadesInimigas);
-
-                doAlphaBeta(newState, moveVec, state);
-                //função que analisa o moveVec em busca de ataques desnecessários
-                removeLoseAttacks(newState, moveVec, state);
-
-                copiarStateCleanUnit(state, newState);
-            }
-        }
-
-        listaOrdenada(state.getEnemy(_playerID), ourUnit, state, unidadesInimigas);
-        while (!(_UnReut.empty())
-                and unidadesInimigas.size() > 0) {
-            for (auto & un : _UnReut) {
-                if (!newState.unitExist(_playerID, un.ID())) {
-                    newState.addUnitWithID(un);
-                }
-            }
-            _UnReut.clear();
-
-            newState.addUnitWithID(getCalculateEnemy(newState, unidadesInimigas));
-
-            doAlphaBeta(newState, moveVec, state);
-
-            //função que analisa o moveVec em busca de ataques desnecessários
-            if (state.numUnits(state.getEnemy(_playerID)) > 1) {
-                removeLoseAttacks(newState, moveVec, state);
-            }
-
-            copiarStateCleanUnit(state, newState);
-            listaOrdenada(state.getEnemy(_playerID), _UnReut[0], state, unidadesInimigas);
-        }
-    }
-
-    /*
-     std::cout<<"##################################################"<<std::endl;
-    std::cout<<"************* INICIO GenerationClass  **************"<<std::endl;
-    for(auto & ac : moveVec){
-        std::cout<<ac.debugString()<<std::endl;
-    }
-    std::cout<<"************* FIM GenerationClass  **************"<<std::endl;
-    std::cout<<"##################################################"<<std::endl;
     
-    printMapAttack()
-     */
+    
+    std::cout<<"¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨ INICIO Unidades ¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨"  <<std::endl;
+    for(auto & un : _unitAbsAB){
+        un.print();
+    }
+    std::cout<<"¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨ FIM Unidades ¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨"  <<std::endl;
 
 }
 
-void GenerationClass::analisarAbstractForm(GameState newState, std::vector<Unit> unidadesInimigas) {
+void GenerationClassWithClosest::analisarAbstractForm(GameState newState, std::vector<Unit> unidadesInimigas) {
     //obtenho a unidade inimiga contida na abstração
     Unit & enemy = newState.getUnit(newState.getEnemy(_playerID), 0);
 
@@ -367,7 +226,7 @@ void GenerationClass::analisarAbstractForm(GameState newState, std::vector<Unit>
  *  Função que consiste do processo de analisar se exitem outras unidades inimigas que podem
  * ser atacadas pelas unidades contidas na abstração e adicionar estas unidades inimigas ao estado.
  */
-void GenerationClass::addMoreEnemy(GameState& newState, std::vector<Unit>& unInimigas) {
+void GenerationClassWithClosest::addMoreEnemy(GameState& newState, std::vector<Unit>& unInimigas) {
     if (unInimigas.size() > 0) {
         //obter unidades aliadas da abstração
         std::vector<Unit> unAl;
@@ -400,7 +259,7 @@ void GenerationClass::addMoreEnemy(GameState& newState, std::vector<Unit>& unIni
  *  & unInimigas    - Vetor com todas as unidades inimigas
  *  & state         - Estado real do jogo
  */
-bool GenerationClass::applyClosestInicialization(std::vector<Unit> & unAliadas, std::vector<Unit> & unInimigas, GameState & state) {
+bool GenerationClassWithClosest::applyClosestInicialization(std::vector<Unit> & unAliadas, std::vector<Unit> & unInimigas, GameState & state) {
     if (unAliadas.size() != state.numUnits(_playerID)) {
         return false;
     }
@@ -419,7 +278,7 @@ bool GenerationClass::applyClosestInicialization(std::vector<Unit> & unAliadas, 
 //função que analisa os movimentos sugeridos pelo AB e busca encontrar ataques perdidos
 //funciona apenas com 1 unidade inimiga
 
-void GenerationClass::removeLoseAttacks(GameState& newState, std::vector<Action>& moveVec, GameState & state) {
+void GenerationClassWithClosest::removeLoseAttacks(GameState& newState, std::vector<Action>& moveVec, GameState & state) {
     _UnReut.clear();
     Unit unAval;
 
@@ -461,7 +320,7 @@ void GenerationClass::removeLoseAttacks(GameState& newState, std::vector<Action>
 
 //função utilizada para remoção das ações de dentro do vetor moveVec
 
-void GenerationClass::removeActionInVector(Action& action, std::vector<Action>& moveVec) {
+void GenerationClassWithClosest::removeActionInVector(Action& action, std::vector<Action>& moveVec) {
     std::vector<Action> newMoveVec;
     for (auto & mov : moveVec) {
         if (!(mov == action)) {
@@ -477,7 +336,7 @@ void GenerationClass::removeActionInVector(Action& action, std::vector<Action>& 
 //Comportamento inicial: Será criada a média da distância Euclidiana de todas as unidades aliadas em relação
 //às unidades inimigas. Será escolhida a unidade inimiga que tiver a menor distância.
 
-Unit& GenerationClass::getCalculateEnemy(GameState& state, std::vector<Unit> unidadesInimigas) {
+Unit& GenerationClassWithClosest::getCalculateEnemy(GameState& state, std::vector<Unit> unidadesInimigas) {
     std::map<Unit, PositionType> unDistance;
     std::map<Unit, PositionType>::iterator myIt;
     PositionType sum;
@@ -529,82 +388,10 @@ Unit& GenerationClass::getCalculateEnemy(GameState& state, std::vector<Unit> uni
 
 }
 
-void GenerationClass::getMoves2(GameState& state, const MoveArray& moves, std::vector<Action>& moveVec) {
-
-    //vetor de controle de abstrações a serem escolhidas
-    std::vector< std::vector<Action> > vecMoves;
-    //estado que será utilizado para simular as variações necessárias do AB
-    GameState newState;
-
-    //vetores ordenados por distancia que conterão as unidades
-    std::vector<Unit> unidadesAliadas;
-    std::vector<Unit> unidadesInimigas;
-
-    for (int qtdUnPlayerAbstr = 20; qtdUnPlayerAbstr <= moves.numUnits(); ++qtdUnPlayerAbstr) {
-        moveVec.clear();
-        _unAttack.clear();
-
-        //obtem nossa unidade inicial.
-        const Unit & ourUnit(state.getUnit(_playerID, (0)));
-
-        listaOrdenadaForMoves(_playerID, ourUnit, state, unidadesAliadas, moves);
-        //listaOrdenada(state.getEnemy(_playerID), ourUnit, state, unidadesInimigas);
-
-        int control = 0;
-        for (auto & un : unidadesAliadas) {
-            control++;
-            //para mudanças na forma de escolha das unidades associadas
-            if (newState.numUnits(_playerID) == 0) {
-                listaOrdenada(state.getEnemy(_playerID), un, state, unidadesInimigas);
-            }
-            if (qtdUnPlayerAbstr != newState.numUnits(_playerID)) {
-                //adiciono o número de unidades que desejamos na abstração
-                newState.addUnitWithID(un);
-                //listaOrdenada(state.getEnemy(_playerID), un, state, unidadesInimigas);
-                newState.addUnitWithID(getEnemyClosestvalid(newState, unidadesInimigas));
-            }
-            if (qtdUnPlayerAbstr == newState.numUnits(_playerID)
-                    or unidadesAliadas.size() == control) {
-                //fim validando
-                doAlphaBeta(newState, moveVec, state);
-                copiarStateCleanUnit(state, newState);
-            }
-        }
-        vecMoves.push_back(moveVec);
-    }
-
-    //inicia o processo para escolher qual abstração será utilizada
-    GameState evalGame;
-    ScoreType ltd2max = 999999;
-    std::vector<Action> & moveVecSelected = vecMoves[0];
-
-    for (auto & mov : vecMoves) {
-        evalGame = state;
-        evalGame.makeMoves(mov);
-        //if(ltd2max > evalGame.LTD2(state.getEnemy(_playerID))){  //diminuir o ltd2 do meu adversário
-        //if(ltd2max < evalGame.LTD2_playerID)){  //jogadas que melhorem (aumentem) o meu ltd2
-        //if(ltd2max < evalGame.evalLTD2(_playerID)){  //jogadas que melhorem (aumentem) o meu ltd2
-        //if(ltd2max < evalGame.eval(_playerID, PlayerModels::NOKDPS, PlayerModels::KiterDPS).val()){  //avaliação utilizando playout
-        if (ltd2max > evalGame.eval(state.getEnemy(_playerID), PlayerModels::NOKDPS, PlayerModels::KiterDPS).val()) { //avaliação utilizando playout
-            ltd2max = evalGame.evalLTD2(_playerID);
-            moveVecSelected = mov;
-        }
-    }
-    moveVec = moveVecSelected;
-
-    //std::cout<<"##################################################"<<std::endl;
-    //std::cout<<"************* INICIO GenerationClass  **************"<<std::endl;
-    //for(auto & ac : moveVec){
-    //    std::cout<<ac.debugString()<<std::endl;
-    //}
-    //std::cout<<"************* FIM GenerationClass  **************"<<std::endl;
-
-}
-
 //função para rodar a abstração que será testada.
 //entrada: Novo GameState com as unidades testadas. Vetor de ações que será retornado. GameState original.
 
-void GenerationClass::doAlphaBeta(GameState & newState, std::vector<Action> & moveVec, GameState & state) {
+void GenerationClassWithClosest::doAlphaBeta(GameState & newState, std::vector<Action> & moveVec, GameState & state) {
     //executa a busca
     alphaBeta->doSearch(newState);
     for (auto & mov : alphaBeta->getResults().bestMoves) {
@@ -631,7 +418,7 @@ void GenerationClass::doAlphaBeta(GameState & newState, std::vector<Action> & mo
 
 //adicionar uma unidade no vetor de controle de ataque de unidades.
 
-void GenerationClass::addAttack(const Unit& unitEnemy, const Unit& unitAttack) {
+void GenerationClassWithClosest::addAttack(const Unit& unitEnemy, const Unit& unitAttack) {
     if (_unAttack.find(unitEnemy) == _unAttack.end()) {
         //não foi encontrado. Insere no map
         std::vector<Unit> unitsAttack;
@@ -645,7 +432,7 @@ void GenerationClass::addAttack(const Unit& unitEnemy, const Unit& unitAttack) {
 
 //utilizada para debug e verificação do map de controle de ataques.
 
-void GenerationClass::printMapAttack() {
+void GenerationClassWithClosest::printMapAttack() {
     std::cout << " ********************************** " << std::endl;
     std::cout << " Relatório de unidades atacadas " << std::endl;
     for (std::map<Unit, std::vector<Unit> >::const_iterator it = _unAttack.begin(); it != _unAttack.end(); ++it) {
@@ -662,7 +449,7 @@ void GenerationClass::printMapAttack() {
 
 //Verifica qual a unidade válida para inclusão 
 
-Unit GenerationClass::getEnemyClosestvalid(GameState& state, std::vector<Unit> unidadesInimigas) {
+Unit GenerationClassWithClosest::getEnemyClosestvalid(GameState& state, std::vector<Unit> unidadesInimigas) {
     for (auto & un : unidadesInimigas) {
         if (!state.unitExist(un.player(), un.ID())) {
             if (unitNeedMoreAttackForKilled(un)) {
@@ -672,21 +459,18 @@ Unit GenerationClass::getEnemyClosestvalid(GameState& state, std::vector<Unit> u
     }
 }
 
-bool evalUnitDistance(const Unit& u1, const Unit& u2) {
-    return u1.position() < u2.position();
-}
-
 /*
  * Retorna todas as unidades de um player ordenados pela distância da unidade
  * passada como referência (inclusive a unidade passada como ponto de referencia)
  * levando em consideração as unidades que tem movimento válido
  */
-void GenerationClass::listaOrdenadaForMoves(const IDType& playerID, const Unit& unidade, GameState& state, std::vector<Unit>& unidades, const MoveArray& moves) {
+void GenerationClassWithClosest::listaOrdenadaForMoves(const IDType& playerID, const Unit& unidade, GameState& state, std::vector<Unit>& unidades, const MoveArray& moves) {
     unidades.clear();
     //declaração
     Unit t;
-
-    unidades.push_back(unidade);
+    if(!(unidade.ID() == 255)){
+        unidades.push_back(unidade);
+    }
 
     //obtenho posição atual da unidade base
     //Position currentPos = unidade.currentPosition(state.getTime());
@@ -694,7 +478,9 @@ void GenerationClass::listaOrdenadaForMoves(const IDType& playerID, const Unit& 
     for (IDType u(0); u < moves.numUnits(); ++u) {
         t = state.getUnit(playerID, u);
         if (!unidade.equalsID(t)) {
-            unidades.push_back(t);
+            if(!(t.ID() == 255)){
+                unidades.push_back(t);
+            }
             //size_t distSq(currentPos.getDistanceSq(t.currentPosition(state.getTime())));
             //size_t distSq(getDistManhantan(currentPos, t.currentPosition(state.getTime())) );
             //size_t distSq(getDistEuclidiana(currentPos, t.currentPosition(state.getTime())) );
@@ -703,7 +489,7 @@ void GenerationClass::listaOrdenadaForMoves(const IDType& playerID, const Unit& 
     sortUnit(unidades, unidade, state);
 }
 
-void GenerationClass::sortUnit(std::vector<Unit>& unidades, const Unit& base, GameState & state) {
+void GenerationClassWithClosest::sortUnit(std::vector<Unit>& unidades, const Unit& base, GameState & state) {
     for (int i = 1; i < unidades.size(); i++) {
         Unit key = unidades[i];
         int j = i - 1;
@@ -722,7 +508,7 @@ void GenerationClass::sortUnit(std::vector<Unit>& unidades, const Unit& base, Ga
  * Retorna todas as unidades de um player ordenados pela distância da unidade
  * passada como referência (inclusive a unidade passada como ponto de referencia)
  */
-void GenerationClass::listaOrdenada(const IDType& playerID, const Unit & unidade, GameState& state, std::vector<Unit> & unidades) {
+void GenerationClassWithClosest::listaOrdenada(const IDType& playerID, const Unit & unidade, GameState& state, std::vector<Unit> & unidades) {
     unidades.clear();
     //declaração
     Unit t;
@@ -750,7 +536,7 @@ void GenerationClass::listaOrdenada(const IDType& playerID, const Unit & unidade
  * com as unidades zeradas, mantando assim as outras informações 
  * necessárias.
  */
-void GenerationClass::copiarStateCleanUnit(GameState& origState, GameState& copState) {
+void GenerationClassWithClosest::copiarStateCleanUnit(GameState& origState, GameState& copState) {
     copState = origState;
     copState.cleanUpStateUnits();
 }
@@ -758,7 +544,7 @@ void GenerationClass::copiarStateCleanUnit(GameState& origState, GameState& copS
 //inicializa o player alpha beta com as configurações necessárias para executar
 //os testes relacionados à classe
 
-void GenerationClass::iniciarAlphaBeta() {
+void GenerationClassWithClosest::iniciarAlphaBeta() {
 
     // convert them to the proper enum types
     int moveOrderingID = 1;
@@ -811,13 +597,13 @@ void GenerationClass::iniciarAlphaBeta() {
 
 //função para cálculo da distância baseada na fórmula de cálculo da Distância Manhantan
 
-const PositionType GenerationClass::getDistManhantan(const Position& pInicial, const Position& pFinal) {
+const PositionType GenerationClassWithClosest::getDistManhantan(const Position& pInicial, const Position& pFinal) {
     return abs(pInicial.x() - pFinal.x()) + abs(pInicial.y() - pFinal.y());
 }
 
 //função para cálculo da distância baseada na fórmua de cálculo utilizando a Distância Euclidiana
 
-const PositionType GenerationClass::getDistEuclidiana(const Position& pInicial, const Position& pFinal) {
+const PositionType GenerationClassWithClosest::getDistEuclidiana(const Position& pInicial, const Position& pFinal) {
     return sqrt(((pInicial.x() - pFinal.x())*(pInicial.x() - pFinal.x()) +
             (pInicial.y() - pFinal.y())*(pInicial.y() - pFinal.y())
             ));
@@ -826,7 +612,7 @@ const PositionType GenerationClass::getDistEuclidiana(const Position& pInicial, 
 //função utilizada para validar se existe a necessidade de mais um ataque para
 //uma unidade inimiga ou se ela já irá morrer com os ataques existentes.
 
-const bool GenerationClass::unitNeedMoreAttackForKilled(Unit un) {
+const bool GenerationClassWithClosest::unitNeedMoreAttackForKilled(Unit un) {
     if (_unAttack.find(un) == _unAttack.end()) {
         return true;
     }
@@ -843,7 +629,7 @@ const bool GenerationClass::unitNeedMoreAttackForKilled(Unit un) {
 
 //utilizada para remover um ataque da lista de atacantes de um determinado inimigo
 
-void GenerationClass::removeAttackInUnAttack(Unit enemy, Unit Attacker) {
+void GenerationClassWithClosest::removeAttackInUnAttack(Unit enemy, Unit Attacker) {
     std::vector<Unit> cleanUnit;
     for (auto & unAttack : _unAttack.find(enemy)->second) {
         if (!(unAttack.ID() == Attacker.ID())) {

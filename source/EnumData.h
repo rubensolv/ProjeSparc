@@ -103,7 +103,7 @@ namespace SparCraft {
             AlphaBeta, AdaptiveBeamAlphaBeta, AttackClosest, Kiter, Random, AttackWeakest, AttackDPS, KiterDPS, NOKDPS, Kiter_NOKDPS, Cluster,
             PortfolioGreedySearch, PortfolioOnlineEvolution, UCT, ImprovedPortfolioGreedySearch, StratifiedPolicySearch, AdaptableStratifiedPolicySearch,
             IRStratifiedPolicySearch, MoveForward, MoveBackward, GenerationClass, ABPOEFixo, ABPOELimit, ABPGSSand,
-            ABPGSPlus, None, Size
+            ABPGSPlus, ABPGSwithRepeatAction, ABPOELimitWithRepeatAction, GenerationClassWithClosest, None, Size
         };
 
         static void init() {
@@ -135,6 +135,9 @@ namespace SparCraft {
             setData(ABPOELimit, "ABPOELimit");
             setData(ABPGSSand, "ABPGSSand");
             setData(ABPGSPlus, "ABPGSPlus");
+            setData(ABPGSwithRepeatAction, "ABPGSwithRepeatAction");
+            setData(ABPOELimitWithRepeatAction, "ABPOELimitWithRepeatAction");
+            setData(GenerationClassWithClosest, "GenerationClassWithClosest");
             setData(None, "None");
 
         }

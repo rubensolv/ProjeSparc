@@ -1,34 +1,35 @@
 
-#include "ABPGSPlus.h"
+#include "ABPGSwithRepeatAction.h"
 
 using namespace SparCraft;
 
-ABPGSPlus::ABPGSPlus(const IDType& playerID) {
+ABPGSwithRepeatAction::ABPGSwithRepeatAction(const IDType& playerID) {
     _playerID = playerID;
     iniciarAlphaBeta();
-    pgs = new ImprovedPortfolioGreedySearchNoTime(_playerID, PlayerModels::NOKDPS, 1, 0, 40);
+    pgs = new PortfolioGreedySearchNoTime(_playerID, PlayerModels::NOKDPS, 1, 0, 40);
     lastTime = 0;
+    _controlScriptRepeat = 0;
 }
 
+void ABPGSwithRepeatAction::getMoves(GameState& state, const MoveArray& moves, std::vector<Action>& moveVec) {
 
-
-void ABPGSPlus::getMoves(GameState& state, const MoveArray& moves, std::vector<Action>& moveVec) {
-    
     Timer t;
     t.start();
     moveVec.clear();
-    UnitScriptData currentScriptData;
+    //UnitScriptData currentScriptData;
     double ms;
     //state.print();
-    if(lastTime > state.getTime()){
+    if (lastTime > state.getTime()) {
         _unitAbsAB.clear();
+        _controlScriptRepeat = 0;
     }
     lastTime = state.getTime();
-    
+
 
     //estado que será utilizado para simular as variações necessárias do AB
     GameState newState;
     //vetores ordenados por distancia que conterão as unidades
+    UnitScriptData currentScriptData;
     std::vector<Unit> unidadesAliadas;
     std::vector<Unit> unidadesInimigas;
     moveVec.clear();
@@ -42,83 +43,103 @@ void ABPGSPlus::getMoves(GameState& state, const MoveArray& moves, std::vector<A
     //incluído para validação da inicializacao
     listaOrdenada(state.getEnemy(_playerID), ourUnit, state, unidadesInimigas);
 
-        //obtenho os movimentos sugeridos pelo PGS
-        ms = t.getElapsedTimeInMilliSec();
+    //obtenho os movimentos sugeridos pelo PGS
+    ms = t.getElapsedTimeInMilliSec();
+    if (!unitsInMoves(state, moves)) {
         currentScriptData = pgs->searchForScripts(_playerID, state);
-        ms = t.getElapsedTimeInMilliSec() - ms;
-        //std::cout << " Tempo total do PGS "<< ms << std::endl;
-        
-        controlUnitsForAB(state, moves);
-        
-        std::vector<Action> moveVecPgs, movecAB;
+        data = new UnitScriptData(currentScriptData);
+        _controlScriptRepeat++;
+    } else {
 
-        MoveArray movesPGS;
-        state.generateMoves(movesPGS, _playerID);
-        GameState copy(state);
-        currentScriptData.calculateMoves(_playerID, movesPGS, copy, moveVecPgs);
+        if (_controlScriptRepeat == 0) {
+            currentScriptData = pgs->searchForScripts(_playerID, state);
+            data = new UnitScriptData(currentScriptData);
+            _controlScriptRepeat++;
+            std::cout << " Tempo total do PGS " << ms << std::endl;
+        } else {
+            currentScriptData = *data;
+            _controlScriptRepeat++;
+            if (_controlScriptRepeat >= 4) {
+                _controlScriptRepeat = 0;
+            }
+        }
+    }
 
-        if (unitsInMoves(state, moves) and ((40-ms)> 4) ) {
-            //Executo o AB
-            std::set<Unit> unitAbsAB;
-            for(auto & un : _unitAbsAB){
-                unitAbsAB.insert(un);
-            }
-            //std::cout << " Tempo total para AB "<< 40 - ms << std::endl;
-            alphaBeta->setLimitTime(40 - ms);
-            alphaBeta->doSearchWithMoves(state, currentScriptData, unitAbsAB, _playerID);
-            movecAB.assign(alphaBeta->getResults().bestMoves.begin(), alphaBeta->getResults().bestMoves.end());
+    ms = t.getElapsedTimeInMilliSec() - ms;
+    //std::cout << " Tempo total do PGS "<< ms << std::endl;
 
-            //tentativa de utilizar o playout para julgar qual seria a melhor execução Ab-PGS ou PGS.
-            UnitScriptData baseScriptData;
-            const IDType enemyPlayer(state.getEnemy(_playerID));
-            //inicializar o baseScriptData com NO-KDPS
-            //Player
-            for (size_t unitIndex(0); unitIndex < state.numUnits(_playerID); ++unitIndex) {
-                baseScriptData.setUnitScript(state.getUnit(_playerID, unitIndex), SparCraft::PlayerModels::NOKDPS);
-            }
-            //Enemy
-            for (size_t unitIndex(0); unitIndex < state.numUnits(enemyPlayer); ++unitIndex) {
-                baseScriptData.setUnitScript(state.getUnit(enemyPlayer, unitIndex), SparCraft::PlayerModels::NOKDPS);
-            }
+    controlUnitsForAB(state, moves);
 
-            std::vector<Action> moveVecPgsEnemy;
-            if(state.bothCanMove()){
-                //gero os movimentos inimigos
-                MoveArray movesPGSEnemy;
-                state.generateMoves(movesPGSEnemy, enemyPlayer);
-                GameState copy2(state);
-                baseScriptData.calculateMoves(enemyPlayer,movesPGSEnemy, copy2, moveVecPgsEnemy);
-            }
-            
-            //Execução AB-PGS
-            Game gABPGS(state, 50);
-            gABPGS.getState().makeMoves(movecAB);
-            if(gABPGS.getState().bothCanMove()){
-                gABPGS.getState().makeMoves(moveVecPgsEnemy);
-            }
-            gABPGS.getState().finishedMoving();
-            gABPGS.playIndividualScripts(baseScriptData);
+    std::vector<Action> moveVecPgs, movecAB;
 
-            //Execução PGS
-            Game gPGS(state, 50);
-            gPGS.getState().makeMoves(moveVecPgs);
-            if(gPGS.getState().bothCanMove()){
-                gPGS.getState().makeMoves(moveVecPgsEnemy);
-            }
-            gPGS.getState().finishedMoving();
-            gPGS.playIndividualScripts(baseScriptData);
-            
-            if (gABPGS.getState().eval(_playerID, SparCraft::EvaluationMethods::LTD2) >
-                    gPGS.getState().eval(_playerID, SparCraft::EvaluationMethods::LTD2)) {
-                moveVec.assign(alphaBeta->getResults().bestMoves.begin(), alphaBeta->getResults().bestMoves.end());
-                std::cout<<"Escolhemos o ABPGS"<<std::endl;
-            } else {
-                moveVec = moveVecPgs;
-            }
+    MoveArray movesPGS;
+    state.generateMoves(movesPGS, _playerID);
+    GameState copy(state);
+    currentScriptData.calculateMoves(_playerID, movesPGS, copy, moveVecPgs);
 
+    if (unitsInMoves(state, moves) and ((40 - ms) > 4)) {
+        //Executo o AB
+        std::set<Unit> unitAbsAB;
+        for (auto & un : _unitAbsAB) {
+            unitAbsAB.insert(un);
+        }
+        std::cout << " Tempo total para AB " << 40 - ms << std::endl;
+        alphaBeta->setLimitTime(40 - ms);
+        alphaBeta->doSearchWithMoves(state, currentScriptData, unitAbsAB, _playerID);
+        movecAB.assign(alphaBeta->getResults().bestMoves.begin(), alphaBeta->getResults().bestMoves.end());
+
+        //tentativa de utilizar o playout para julgar qual seria a melhor execução Ab-PGS ou PGS.
+        UnitScriptData baseScriptData;
+        const IDType enemyPlayer(state.getEnemy(_playerID));
+        //inicializar o baseScriptData com NO-KDPS
+        //Player
+        for (size_t unitIndex(0); unitIndex < state.numUnits(_playerID); ++unitIndex) {
+            baseScriptData.setUnitScript(state.getUnit(_playerID, unitIndex), SparCraft::PlayerModels::NOKDPS);
+        }
+        //Enemy
+        for (size_t unitIndex(0); unitIndex < state.numUnits(enemyPlayer); ++unitIndex) {
+            baseScriptData.setUnitScript(state.getUnit(enemyPlayer, unitIndex), SparCraft::PlayerModels::NOKDPS);
+        }
+
+        std::vector<Action> moveVecPgsEnemy;
+        if (state.bothCanMove()) {
+            //gero os movimentos inimigos
+            MoveArray movesPGSEnemy;
+            state.generateMoves(movesPGSEnemy, enemyPlayer);
+            GameState copy2(state);
+            baseScriptData.calculateMoves(enemyPlayer, movesPGSEnemy, copy2, moveVecPgsEnemy);
+        }
+
+        //Execução AB-PGS
+        Game gABPGS(state, 50);
+        gABPGS.getState().makeMoves(movecAB);
+        if (gABPGS.getState().bothCanMove()) {
+            gABPGS.getState().makeMoves(moveVecPgsEnemy);
+        }
+        gABPGS.getState().finishedMoving();
+        gABPGS.playIndividualScripts(baseScriptData);
+
+        //Execução PGS
+        Game gPGS(state, 50);
+        gPGS.getState().makeMoves(moveVecPgs);
+        if (gPGS.getState().bothCanMove()) {
+            gPGS.getState().makeMoves(moveVecPgsEnemy);
+        }
+        gPGS.getState().finishedMoving();
+        gPGS.playIndividualScripts(baseScriptData);
+
+        if (gABPGS.getState().eval(_playerID, SparCraft::EvaluationMethods::LTD2) >
+                gPGS.getState().eval(_playerID, SparCraft::EvaluationMethods::LTD2)) {
+            moveVec.assign(alphaBeta->getResults().bestMoves.begin(), alphaBeta->getResults().bestMoves.end());
+            std::cout << "Escolhemos o ABPGS" << std::endl;
         } else {
             moveVec = moveVecPgs;
         }
+
+    } else {
+
+        moveVec = moveVecPgs;
+    }
 
 
 
@@ -132,6 +153,8 @@ void ABPGSPlus::getMoves(GameState& state, const MoveArray& moves, std::vector<A
      */
     ms = t.getElapsedTimeInMilliSec();
     //printf("\nGenerationClass   Execução completa %lf ms\n", ms);
+
+    std::cout << "************* FIM GenerationClass  **************" << std::endl;
 
 
     /*
@@ -147,14 +170,15 @@ void ABPGSPlus::getMoves(GameState& state, const MoveArray& moves, std::vector<A
     std::cout<<"************* FIM GenerationClass PGS **************"<<std::endl;
     std::cout<<"##################################################"<<std::endl;
      */
-    
+
 }
 
-bool ABPGSPlus::unitsInMoves(GameState& state, const MoveArray& moves) {
+bool ABPGSwithRepeatAction::unitsInMoves(GameState& state, const MoveArray& moves) {
     for (size_t unitIndex(0); unitIndex < moves.numUnits(); ++unitIndex) {
         const Unit & unit = state.getUnit(_playerID, unitIndex);
         for (auto & un : _unitAbsAB) {
             if (un.ID() == unit.ID()) {
+
                 return true;
             }
         }
@@ -166,17 +190,17 @@ bool ABPGSPlus::unitsInMoves(GameState& state, const MoveArray& moves) {
 //separo as unidades que serão utilizadas para compor a abstração que será utilizada no AB
 //e faço controle e manutenção destas
 
-void ABPGSPlus::controlUnitsForAB(GameState & state, const MoveArray & moves) {
+void ABPGSwithRepeatAction::controlUnitsForAB(GameState & state, const MoveArray & moves) {
     int numUnits = 4;
     //verifico se as unidades não foram mortas
-    std::set<Unit, lex_comp> tempUnitAbsAB;
+    std::set<Unit, lex_com> tempUnitAbsAB;
     for (auto & un : _unitAbsAB) {
-        if (state.unitExist(_playerID, un.ID()))  {
+        if (state.unitExist(_playerID, un.ID())) {
             tempUnitAbsAB.insert(un);
         }
     }
     _unitAbsAB = tempUnitAbsAB;
-    
+
     if (state.numUnits(_playerID) <= numUnits) {
         _unitAbsAB.clear();
         //adiciono todas as unidades para serem controladas pelo AB
@@ -184,13 +208,14 @@ void ABPGSPlus::controlUnitsForAB(GameState & state, const MoveArray & moves) {
             _unitAbsAB.insert(state.getUnit(_playerID, u));
         }
     } else if (!(_unitAbsAB.size() == numUnits)) {
-        
+
         if ((state.numUnits(_playerID) < 2 or moves.numUnits() < 2)
                 and _unitAbsAB.size() == 0) {
             _unitAbsAB.insert(state.getUnit(_playerID, 0));
         } else {
             int control = 0;
             while (_unitAbsAB.size() < numUnits and control < 20) {
+
                 _unitAbsAB.insert(state.getUnit(_playerID, rand() % state.numUnits(_playerID)));
                 control++;
             }
@@ -199,7 +224,7 @@ void ABPGSPlus::controlUnitsForAB(GameState & state, const MoveArray & moves) {
 
 }
 
-void ABPGSPlus::analisarAbstractForm(GameState newState, std::vector<Unit> unidadesInimigas) {
+void ABPGSwithRepeatAction::analisarAbstractForm(GameState newState, std::vector<Unit> unidadesInimigas) {
     //obtenho a unidade inimiga contida na abstração
     Unit & enemy = newState.getUnit(newState.getEnemy(_playerID), 0);
 
@@ -218,7 +243,7 @@ void ABPGSPlus::analisarAbstractForm(GameState newState, std::vector<Unit> unida
  *  Função que consiste do processo de analisar se exitem outras unidades inimigas que podem
  * ser atacadas pelas unidades contidas na abstração e adicionar estas unidades inimigas ao estado.
  */
-void ABPGSPlus::addMoreEnemy(GameState& newState, std::vector<Unit>& unInimigas) {
+void ABPGSwithRepeatAction::addMoreEnemy(GameState& newState, std::vector<Unit>& unInimigas) {
     if (unInimigas.size() > 0) {
         //obter unidades aliadas da abstração
         std::vector<Unit> unAl;
@@ -233,6 +258,7 @@ void ABPGSPlus::addMoreEnemy(GameState& newState, std::vector<Unit>& unInimigas)
                 for (auto & uAmiga : unAl) {
                     if (uAmiga.canAttackTarget(unIn, newState.getTime())) {
                         if (!newState.unitExist(newState.getEnemy(_playerID), unIn.ID())) {
+
                             newState.addUnitWithID(unIn);
                         }
                     }
@@ -251,7 +277,7 @@ void ABPGSPlus::addMoreEnemy(GameState& newState, std::vector<Unit>& unInimigas)
  *  & unInimigas    - Vetor com todas as unidades inimigas
  *  & state         - Estado real do jogo
  */
-bool ABPGSPlus::applyClosestInicialization(std::vector<Unit> & unAliadas, std::vector<Unit> & unInimigas, GameState & state) {
+bool ABPGSwithRepeatAction::applyClosestInicialization(std::vector<Unit> & unAliadas, std::vector<Unit> & unInimigas, GameState & state) {
     if (unAliadas.size() != state.numUnits(_playerID)) {
         return false;
     }
@@ -259,6 +285,7 @@ bool ABPGSPlus::applyClosestInicialization(std::vector<Unit> & unAliadas, std::v
     for (auto & unAl : unAliadas) {
         for (auto & unEn : unInimigas) {
             if (unAl.canAttackTarget(unEn, state.getTime())) {
+
                 return false;
             }
         }
@@ -270,7 +297,7 @@ bool ABPGSPlus::applyClosestInicialization(std::vector<Unit> & unAliadas, std::v
 //função que analisa os movimentos sugeridos pelo AB e busca encontrar ataques perdidos
 //funciona apenas com 1 unidade inimiga
 
-void ABPGSPlus::removeLoseAttacks(GameState& newState, std::vector<Action>& moveVec, GameState & state) {
+void ABPGSwithRepeatAction::removeLoseAttacks(GameState& newState, std::vector<Action>& moveVec, GameState & state) {
     _UnReut.clear();
     Unit unAval;
 
@@ -296,6 +323,7 @@ void ABPGSPlus::removeLoseAttacks(GameState& newState, std::vector<Action>& move
             } else {
                 //std::cout<<"--- Ação considerada desnecessária. HP Atual= "<<enemyHP <<" "<< std::endl;
                 //caso o Hp seja zero, esta será uma ação perdida. Removo do vetor.
+
                 removeActionInVector(mov, moveVec);
                 //removo do vetor _unAttack a unidade que não mais efetua ataques
                 removeAttackInUnAttack(enemy, unAval);
@@ -312,10 +340,11 @@ void ABPGSPlus::removeLoseAttacks(GameState& newState, std::vector<Action>& move
 
 //função utilizada para remoção das ações de dentro do vetor moveVec
 
-void ABPGSPlus::removeActionInVector(Action& action, std::vector<Action>& moveVec) {
+void ABPGSwithRepeatAction::removeActionInVector(Action& action, std::vector<Action>& moveVec) {
     std::vector<Action> newMoveVec;
     for (auto & mov : moveVec) {
         if (!(mov == action)) {
+
             newMoveVec.push_back(mov);
         }
     }
@@ -328,7 +357,7 @@ void ABPGSPlus::removeActionInVector(Action& action, std::vector<Action>& moveVe
 //Comportamento inicial: Será criada a média da distância Euclidiana de todas as unidades aliadas em relação
 //às unidades inimigas. Será escolhida a unidade inimiga que tiver a menor distância.
 
-Unit& ABPGSPlus::getCalculateEnemy(GameState& state, std::vector<Unit> unidadesInimigas) {
+Unit& ABPGSwithRepeatAction::getCalculateEnemy(GameState& state, std::vector<Unit> unidadesInimigas) {
     std::map<Unit, PositionType> unDistance;
     std::map<Unit, PositionType>::iterator myIt;
     PositionType sum;
@@ -370,6 +399,7 @@ Unit& ABPGSPlus::getCalculateEnemy(GameState& state, std::vector<Unit> unidadesI
                 and myIt->first.currentHP() < bestUnit.currentHP()
                 and unitNeedMoreAttackForKilled(myIt->first)
                 ) {
+
             bestPosition = myIt->second;
             bestUnit = myIt->first;
         }
@@ -383,7 +413,7 @@ Unit& ABPGSPlus::getCalculateEnemy(GameState& state, std::vector<Unit> unidadesI
 //função para rodar a abstração que será testada.
 //entrada: Novo GameState com as unidades testadas. Vetor de ações que será retornado. GameState original.
 
-void ABPGSPlus::doAlphaBeta(GameState & newState, std::vector<Action> & moveVec, GameState & state) {
+void ABPGSwithRepeatAction::doAlphaBeta(GameState & newState, std::vector<Action> & moveVec, GameState & state) {
     //executa a busca
     alphaBeta->doSearch(newState);
     for (auto & mov : alphaBeta->getResults().bestMoves) {
@@ -399,6 +429,7 @@ void ABPGSPlus::doAlphaBeta(GameState & newState, std::vector<Action> & moveVec,
             //insere no vetor qual unidade aliada está atacando
             addAttack(newState.getUnit(state.getEnemy(_playerID), mov.index()), newState.getUnit(_playerID, mov.unit()));
         } else {
+
             moveVec.push_back(Action(state.getIndexUnit(_playerID, newState.getUnit(_playerID, mov.unit()).ID()),
                     mov.player(),
                     mov.type(),
@@ -410,7 +441,7 @@ void ABPGSPlus::doAlphaBeta(GameState & newState, std::vector<Action> & moveVec,
 
 //adicionar uma unidade no vetor de controle de ataque de unidades.
 
-void ABPGSPlus::addAttack(const Unit& unitEnemy, const Unit& unitAttack) {
+void ABPGSwithRepeatAction::addAttack(const Unit& unitEnemy, const Unit& unitAttack) {
     if (_unAttack.find(unitEnemy) == _unAttack.end()) {
         //não foi encontrado. Insere no map
         std::vector<Unit> unitsAttack;
@@ -418,13 +449,14 @@ void ABPGSPlus::addAttack(const Unit& unitEnemy, const Unit& unitAttack) {
         _unAttack[unitEnemy] = unitsAttack;
     } else {
         //apenas atualiza as unidades atacantes
+
         _unAttack.find(unitEnemy)->second.push_back(unitAttack);
     }
 }
 
 //utilizada para debug e verificação do map de controle de ataques.
 
-void ABPGSPlus::printMapAttack() {
+void ABPGSwithRepeatAction::printMapAttack() {
     std::cout << " ********************************** " << std::endl;
     std::cout << " Relatório de unidades atacadas " << std::endl;
     for (std::map<Unit, std::vector<Unit> >::const_iterator it = _unAttack.begin(); it != _unAttack.end(); ++it) {
@@ -432,6 +464,7 @@ void ABPGSPlus::printMapAttack() {
         it->first.print();
         std::cout << " Unidades atacantes= " << std::endl;
         for (auto & un : it->second) {
+
             un.print();
         }
         std::cout << " " << std::endl;
@@ -441,10 +474,11 @@ void ABPGSPlus::printMapAttack() {
 
 //Verifica qual a unidade válida para inclusão 
 
-Unit ABPGSPlus::getEnemyClosestvalid(GameState& state, std::vector<Unit> unidadesInimigas) {
+Unit ABPGSwithRepeatAction::getEnemyClosestvalid(GameState& state, std::vector<Unit> unidadesInimigas) {
     for (auto & un : unidadesInimigas) {
         if (!state.unitExist(un.player(), un.ID())) {
             if (unitNeedMoreAttackForKilled(un)) {
+
                 return un;
             }
         }
@@ -456,7 +490,7 @@ Unit ABPGSPlus::getEnemyClosestvalid(GameState& state, std::vector<Unit> unidade
  * passada como referência (inclusive a unidade passada como ponto de referencia)
  * levando em consideração as unidades que tem movimento válido
  */
-void ABPGSPlus::listaOrdenadaForMoves(const IDType& playerID, const Unit& unidade, GameState& state, std::vector<Unit>& unidades, const MoveArray& moves) {
+void ABPGSwithRepeatAction::listaOrdenadaForMoves(const IDType& playerID, const Unit& unidade, GameState& state, std::vector<Unit>& unidades, const MoveArray& moves) {
     unidades.clear();
     //declaração
     Unit t;
@@ -469,6 +503,7 @@ void ABPGSPlus::listaOrdenadaForMoves(const IDType& playerID, const Unit& unidad
     for (IDType u(0); u < moves.numUnits(); ++u) {
         t = state.getUnit(playerID, u);
         if (!unidade.equalsID(t)) {
+
             unidades.push_back(t);
             //size_t distSq(currentPos.getDistanceSq(t.currentPosition(state.getTime())));
             //size_t distSq(getDistManhantan(currentPos, t.currentPosition(state.getTime())) );
@@ -478,7 +513,7 @@ void ABPGSPlus::listaOrdenadaForMoves(const IDType& playerID, const Unit& unidad
     sortUnit(unidades, unidade, state);
 }
 
-void ABPGSPlus::sortUnit(std::vector<Unit>& unidades, const Unit& base, GameState & state) {
+void ABPGSwithRepeatAction::sortUnit(std::vector<Unit>& unidades, const Unit& base, GameState & state) {
     for (int i = 1; i < unidades.size(); i++) {
         Unit key = unidades[i];
         int j = i - 1;
@@ -486,6 +521,7 @@ void ABPGSPlus::sortUnit(std::vector<Unit>& unidades, const Unit& base, GameStat
                 > getDistManhantan(base.currentPosition(state.getTime()), key.currentPosition(state.getTime())))
                 && (unidades[j].currentHP() >= key.currentHP())
                 ) {
+
             unidades[j + 1] = unidades[j];
             j--;
         }
@@ -497,7 +533,7 @@ void ABPGSPlus::sortUnit(std::vector<Unit>& unidades, const Unit& base, GameStat
  * Retorna todas as unidades de um player ordenados pela distância da unidade
  * passada como referência (inclusive a unidade passada como ponto de referencia)
  */
-void ABPGSPlus::listaOrdenada(const IDType& playerID, const Unit & unidade, GameState& state, std::vector<Unit> & unidades) {
+void ABPGSwithRepeatAction::listaOrdenada(const IDType& playerID, const Unit & unidade, GameState& state, std::vector<Unit> & unidades) {
     unidades.clear();
     //declaração
     Unit t;
@@ -513,6 +549,7 @@ void ABPGSPlus::listaOrdenada(const IDType& playerID, const Unit & unidade, Game
         t = state.getUnit(playerID, u);
         if (!unidade.equalsID(t)) {
             if (unitNeedMoreAttackForKilled(t)) {
+
                 unidades.push_back(t);
             }
         }
@@ -525,7 +562,8 @@ void ABPGSPlus::listaOrdenada(const IDType& playerID, const Unit & unidade, Game
  * com as unidades zeradas, mantando assim as outras informações 
  * necessárias.
  */
-void ABPGSPlus::copiarStateCleanUnit(GameState& origState, GameState& copState) {
+void ABPGSwithRepeatAction::copiarStateCleanUnit(GameState& origState, GameState& copState) {
+
     copState = origState;
     copState.cleanUpStateUnits();
 }
@@ -533,7 +571,7 @@ void ABPGSPlus::copiarStateCleanUnit(GameState& origState, GameState& copState) 
 //inicializa o player alpha beta com as configurações necessárias para executar
 //os testes relacionados à classe
 
-void ABPGSPlus::iniciarAlphaBeta() {
+void ABPGSwithRepeatAction::iniciarAlphaBeta() {
 
     // convert them to the proper enum types
     int moveOrderingID = 1;
@@ -573,6 +611,7 @@ void ABPGSPlus::iniciarAlphaBeta() {
             params.setSimScripts(playoutScriptID1, opponentModelID);
             params.setPlayerModel(1, playoutScriptID2);
         } else {
+
             params.setSimScripts(opponentModelID, playoutScriptID2);
             params.setPlayerModel(0, playoutScriptID1);
         }
@@ -586,13 +625,15 @@ void ABPGSPlus::iniciarAlphaBeta() {
 
 //função para cálculo da distância baseada na fórmula de cálculo da Distância Manhantan
 
-const PositionType ABPGSPlus::getDistManhantan(const Position& pInicial, const Position& pFinal) {
+const PositionType ABPGSwithRepeatAction::getDistManhantan(const Position& pInicial, const Position& pFinal) {
+
     return abs(pInicial.x() - pFinal.x()) + abs(pInicial.y() - pFinal.y());
 }
 
 //função para cálculo da distância baseada na fórmua de cálculo utilizando a Distância Euclidiana
 
-const PositionType ABPGSPlus::getDistEuclidiana(const Position& pInicial, const Position& pFinal) {
+const PositionType ABPGSwithRepeatAction::getDistEuclidiana(const Position& pInicial, const Position& pFinal) {
+
     return sqrt(((pInicial.x() - pFinal.x())*(pInicial.x() - pFinal.x()) +
             (pInicial.y() - pFinal.y())*(pInicial.y() - pFinal.y())
             ));
@@ -601,7 +642,7 @@ const PositionType ABPGSPlus::getDistEuclidiana(const Position& pInicial, const 
 //função utilizada para validar se existe a necessidade de mais um ataque para
 //uma unidade inimiga ou se ela já irá morrer com os ataques existentes.
 
-const bool ABPGSPlus::unitNeedMoreAttackForKilled(Unit un) {
+const bool ABPGSwithRepeatAction::unitNeedMoreAttackForKilled(Unit un) {
     if (_unAttack.find(un) == _unAttack.end()) {
         return true;
     }
@@ -609,6 +650,7 @@ const bool ABPGSPlus::unitNeedMoreAttackForKilled(Unit un) {
     for (auto & unAttack : _unAttack.find(un)->second) {
         HpAtual = HpAtual - unAttack.getDamageTo(un);
         if (HpAtual <= 0) {
+
             return false;
         }
     }
@@ -618,7 +660,7 @@ const bool ABPGSPlus::unitNeedMoreAttackForKilled(Unit un) {
 
 //utilizada para remover um ataque da lista de atacantes de um determinado inimigo
 
-void ABPGSPlus::removeAttackInUnAttack(Unit enemy, Unit Attacker) {
+void ABPGSwithRepeatAction::removeAttackInUnAttack(Unit enemy, Unit Attacker) {
     std::vector<Unit> cleanUnit;
     for (auto & unAttack : _unAttack.find(enemy)->second) {
         if (!(unAttack.ID() == Attacker.ID())) {
