@@ -677,77 +677,7 @@ void GenerationClassForMetric::removeAttackInUnAttack(Unit enemy, Unit Attacker)
 void GenerationClassForMetric::iniciaAbstracao(GameState& state) {
     std::vector<std::string> combinacoes;
     
-    combinacoes.push_back("0123");
-    combinacoes.push_back("0124");
-    combinacoes.push_back("0134");
-    combinacoes.push_back("0234");
-    combinacoes.push_back("1234");
-    combinacoes.push_back("0125");
-    combinacoes.push_back("0135");
-    combinacoes.push_back("0235");
-    combinacoes.push_back("1235");
-    combinacoes.push_back("0145");
-    combinacoes.push_back("0245");
-    combinacoes.push_back("1245");
-    combinacoes.push_back("0345");
-    combinacoes.push_back("1345");
-    combinacoes.push_back("2345");
-    combinacoes.push_back("0126");
-    combinacoes.push_back("0136");
-    combinacoes.push_back("0236");
-    combinacoes.push_back("1236");
-    combinacoes.push_back("0146");
-    combinacoes.push_back("0246");
-    combinacoes.push_back("1246");
-    combinacoes.push_back("0346");
-    combinacoes.push_back("1346");
-    combinacoes.push_back("2346");
-    combinacoes.push_back("0156");
-    combinacoes.push_back("0256");
-    combinacoes.push_back("1256");
-    combinacoes.push_back("0356");
-    combinacoes.push_back("1356");
-    combinacoes.push_back("2356");
-    combinacoes.push_back("0456");
-    combinacoes.push_back("1456");
-    combinacoes.push_back("2456");
-    combinacoes.push_back("3456");
-    combinacoes.push_back("0127");
-    combinacoes.push_back("0137");
-    combinacoes.push_back("0237");
-    combinacoes.push_back("1237");
-    combinacoes.push_back("0147");
-    combinacoes.push_back("0247");
-    combinacoes.push_back("1247");
-    combinacoes.push_back("0347");
-    combinacoes.push_back("1347");
-    combinacoes.push_back("2347");
-    combinacoes.push_back("0157");
-    combinacoes.push_back("0257");
-    combinacoes.push_back("1257");
-    combinacoes.push_back("0357");
-    combinacoes.push_back("1357");
-    combinacoes.push_back("2357");
-    combinacoes.push_back("0457");
-    combinacoes.push_back("1457");
-    combinacoes.push_back("2457");
-    combinacoes.push_back("3457");
-    combinacoes.push_back("0167");
-    combinacoes.push_back("0267");
-    combinacoes.push_back("1267");
-    combinacoes.push_back("0367");
-    combinacoes.push_back("1367");
-    combinacoes.push_back("2367");
-    combinacoes.push_back("0467");
-    combinacoes.push_back("1467");
-    combinacoes.push_back("2467");
-    combinacoes.push_back("3467");
-    combinacoes.push_back("0567");
-    combinacoes.push_back("1567");
-    combinacoes.push_back("2567");
-    combinacoes.push_back("3567");
-    combinacoes.push_back("4567");
-
+    gerarCombinacoes(combinacoes);
     
     std::vector<Unit> unTemp;
     for(auto & com : combinacoes){
@@ -818,3 +748,60 @@ void GenerationClassForMetric::printMedia(GameState& state){
     std::cout<<"-------------- FIM DISTANCIAS ---------------------- "<<std::endl;
 }
 
+void GenerationClassForMetric::gerarCombinacoes(std::vector<std::string>& combinacoes){
+    unsigned MAX, MASK, NUM ;
+    int i, j, r, k ;
+    /* Armazena a string de entrada. */
+    char input[31] ;
+    /* Armazena cada combinação. */
+    char str[31] ;
+
+    strcpy(input, "01234567");
+    r = 4;
+
+    
+    MAX = ~(1 << strlen(input)) ;
+
+    /* Primeiro número é o 1. */
+    NUM = 1;
+
+    /* Quando o número alcançar MAX, o loop
+     * será encerrado.
+     */
+    while ( MAX & NUM ) {
+        /* Conta os bits 1's. */
+        MASK = 1 ;
+        k = 0 ;
+        while ( MAX & MASK ) {
+            if ( NUM & MASK ) k++ ;
+            MASK = MASK << 1 ;
+        }
+
+        /* Monta o resultado somente se
+         * a quantidade de bits k é igual
+         * a r. */
+        if ( k == r ) {
+            MASK = 1 ;
+            i = j = 0 ;
+
+            while ( MAX & MASK ) {
+                /* Verdadeiro se NUM tem um bit 1
+                 * na posição indicada por MASK. */
+                if ( NUM & MASK ) {
+                    /* Gera a combinação em str */
+                    str[i] = input[j] ;
+                    i++ ;
+                }
+                j++ ;
+                /* Desloca a máscara */
+                MASK = MASK << 1 ;
+            }
+
+            str[i]=0 ;
+            combinacoes.push_back(str);
+        }
+
+        NUM++ ;
+    }
+    
+}

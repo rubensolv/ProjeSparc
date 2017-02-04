@@ -81,6 +81,7 @@ namespace SparCraft {
         void iniciaAbstracao(GameState& state);
         std::vector<Unit> copiaVector(std::vector<Unit> original);
         void printMedia(GameState& state);
+        void gerarCombinacoes(std::vector<std::string> & combinacoes);
     };
 }
 
