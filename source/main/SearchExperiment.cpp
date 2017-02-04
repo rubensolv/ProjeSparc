@@ -547,6 +547,10 @@ void SearchExperiment::addPlayer(const std::string & line)
     { 
         players[playerID].push_back(PlayerPtr(new GenerationClassWithClosest(playerID)));
     }
+        else if (playerModelID == PlayerModels::GenerationClassForMetric)				
+    { 
+        players[playerID].push_back(PlayerPtr(new GenerationClassForMetric(playerID)));
+    }
 else if (playerModelID == PlayerModels::ImprovedPortfolioGreedySearch)
     {
         std::string enemyPlayerModel;
@@ -1178,6 +1182,8 @@ void SearchExperiment::runExperiment()
                 	cout << "Empate!!" << endl;
                     numDraws[p1Player][p2Player]++;
                 }
+                
+                cout << "LTD2 Final ="<< gameEval <<"\n\n"<< endl;
 
 				double ms = g.getTime();
 				sprintf(buf, " %10d %6d %12.2lf", gameEval, g.getRounds(), ms);

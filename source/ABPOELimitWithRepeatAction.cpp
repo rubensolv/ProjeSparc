@@ -9,10 +9,11 @@ ABPOELimitWithRepeatAction::ABPOELimitWithRepeatAction(const IDType& playerID) {
     poe = new PortfolioOnlineEvolutionLimit(_playerID, PlayerModels::NOKDPS, 1, 0, 40);
     lastTime = 0;
     _controlScriptRepeat = 0;
+    std::cout<<"ABPOELimitWithRepeatAction"<<std::endl;
 }
 
 void ABPOELimitWithRepeatAction::getMoves(GameState& state, const MoveArray& moves, std::vector<Action>& moveVec) {
-    std::cout << "************* INICIO ABPOELimit  **************" << std::endl;
+
     Timer t;
     t.start();
     moveVec.clear();
@@ -75,7 +76,6 @@ void ABPOELimitWithRepeatAction::getMoves(GameState& state, const MoveArray& mov
                 currentScriptData = poe->searchForScripts(_playerID, state);
                 data = new UnitScriptData(currentScriptData);
                 _controlScriptRepeat++;
-                std::cout << " Tempo total do PGS " << ms << std::endl;
             } else {
                 currentScriptData = *data;
                 _controlScriptRepeat++;
@@ -85,7 +85,6 @@ void ABPOELimitWithRepeatAction::getMoves(GameState& state, const MoveArray& mov
             }
         }
         ms = t.getElapsedTimeInMilliSec() - ms;
-        std::cout << " Tempo total do POELimit " << ms << std::endl;
 
         controlUnitsForAB(state, moves);
 
@@ -102,7 +101,6 @@ void ABPOELimitWithRepeatAction::getMoves(GameState& state, const MoveArray& mov
             for (auto & un : _unitAbsAB) {
                 unitAbsAB.insert(un);
             }
-            std::cout << " Tempo total para AB " << 40 - ms << std::endl;
             alphaBeta->setLimitTime(40 - ms);
             alphaBeta->doSearchWithMoves(state, currentScriptData, unitAbsAB, _playerID);
             movecAB.assign(alphaBeta->getResults().bestMoves.begin(), alphaBeta->getResults().bestMoves.end());
@@ -174,7 +172,6 @@ void ABPOELimitWithRepeatAction::getMoves(GameState& state, const MoveArray& mov
     std::cout << "##################################################" << std::endl;
      */
     ms = t.getElapsedTimeInMilliSec();
-    printf("\nABPOELimit   Execução completa %lf ms\n", ms);
 
 
     /*
@@ -190,7 +187,6 @@ void ABPOELimitWithRepeatAction::getMoves(GameState& state, const MoveArray& mov
     std::cout<<"************* FIM GenerationClass PGS **************"<<std::endl;
     std::cout<<"##################################################"<<std::endl;
      */
-    std::cout << "************* FIM ABPOELimit  **************" << std::endl;
 }
 
 bool ABPOELimitWithRepeatAction::unitsInMoves(GameState& state, const MoveArray& moves) {

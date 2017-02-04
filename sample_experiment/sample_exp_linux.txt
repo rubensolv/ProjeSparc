@@ -77,7 +77,8 @@ Player 1 PortfolioOnlineEvolution 40 NOKDPS 1 0
 #Player 1 IRStratifiedPolicySearch 40 NOKDPS 1 0
 
 # Sample Scripted Players
-Player 0 GenerationClass
+#Player 0 GenerationClass
+Player 0 GenerationClassForMetric
 #Player 0 ABPOEFixo
 #Player 0 ABPOELimit
 #Player 0 ABPGSPlus
@@ -117,9 +118,14 @@ Player 0 GenerationClass
 
 # Sample StateDescriptionFile States
 #State StateDescriptionFile 10 PATH_TO\sample_state.txt
+#State StateDescriptionFile 70 /home/rubens/ProjeSparc/sample_experiment/sample_state_teste.txt
+#State StateDescriptionFile 70 /home/rubens/ProjeSparc/sample_experiment/sample_state_vitoria.txt
+#State StateDescriptionFile 70 /home/rubens/ProjeSparc/sample_experiment/sample_state_derrota.txt
 
 # Sample SeparatedState States
-State SeparatedState 100 128 128 400 360 840 360 Protoss_Dragoon 20
+#State SeparatedState 70 128 128 400 360 840 360 Protoss_Dragoon 4 Terran_Marine 4
+State SeparatedState 70 128 128 400 360 840 360 Protoss_Dragoon 4 Protoss_Zealot 4
+#State SeparatedState 100 128 128 400 360 840 360 Protoss_Dragoon 20
 #State SeparatedState 100 128 128 400 360 840 360 Zerg_Zergling 15 Protoss_Dragoon 8
 #State SeparatedState 100 128 128 400 360 840 360 Protoss_Dragoon 4 Terran_Marine 4
 #State SeparatedState 100 128 128 400 360 840 360 Protoss_Dragoon 8 Protoss_Zealot 8
@@ -134,6 +140,7 @@ State SeparatedState 100 128 128 400 360 840 360 Protoss_Dragoon 20
 #State SeparatedState 2 128 128 400 360 840 360 Terran_Marine 25 Zerg_Zergling 25
 
 # Sample Symmetric State States
+#State StateSymmetric 4 128 128 Protoss_Dragoon 4 Terran_Marine 4
 #State StateSymmetric 2 128 128 Protoss_Dragoon 8
 #State StateSymmetric 2 128 128 Zerg_Zergling 8
 #State StateSymmetric 2 128 128 Protoss_Dragoon 16 Protoss_Zealot 16
@@ -178,4 +185,4 @@ ResultsFile PATH_TO\sample_exp true
 #
 ##################################################
 
-Display false PATH_TO\starcraft_images\
+Display true PATH_TO\starcraft_images\

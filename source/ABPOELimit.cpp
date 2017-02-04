@@ -13,7 +13,7 @@ ABPOELimit::ABPOELimit(const IDType& playerID) {
 
 
 void ABPOELimit::getMoves(GameState& state, const MoveArray& moves, std::vector<Action>& moveVec) {
-    std::cout << "************* INICIO ABPOELimit  **************" << std::endl;
+    
     Timer t;
     t.start();
     moveVec.clear();
@@ -67,7 +67,6 @@ void ABPOELimit::getMoves(GameState& state, const MoveArray& moves, std::vector<
         ms = t.getElapsedTimeInMilliSec();
         currentScriptData = poe->searchForScripts(_playerID, state);
         ms = t.getElapsedTimeInMilliSec() - ms;
-        std::cout << " Tempo total do POELimit "<< ms << std::endl;
         
         controlUnitsForAB(state, moves);
         
@@ -84,7 +83,6 @@ void ABPOELimit::getMoves(GameState& state, const MoveArray& moves, std::vector<
             for(auto & un : _unitAbsAB){
                 unitAbsAB.insert(un);
             }
-            std::cout << " Tempo total para AB "<< 40 - ms << std::endl;
             alphaBeta->setLimitTime(40 - ms );
             alphaBeta->doSearchWithMoves(state, currentScriptData, unitAbsAB, _playerID);
             movecAB.assign(alphaBeta->getResults().bestMoves.begin(), alphaBeta->getResults().bestMoves.end());
@@ -156,7 +154,6 @@ void ABPOELimit::getMoves(GameState& state, const MoveArray& moves, std::vector<
     std::cout << "##################################################" << std::endl;
      */
     ms = t.getElapsedTimeInMilliSec();
-    printf("\nABPOELimit   Execução completa %lf ms\n", ms);
 
 
     /*
@@ -172,7 +169,6 @@ void ABPOELimit::getMoves(GameState& state, const MoveArray& moves, std::vector<
     std::cout<<"************* FIM GenerationClass PGS **************"<<std::endl;
     std::cout<<"##################################################"<<std::endl;
      */
-    std::cout << "************* FIM ABPOELimit  **************" << std::endl;
 }
 
 bool ABPOELimit::unitsInMoves(GameState& state, const MoveArray& moves) {

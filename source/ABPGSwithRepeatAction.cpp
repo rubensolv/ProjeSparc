@@ -9,6 +9,7 @@ ABPGSwithRepeatAction::ABPGSwithRepeatAction(const IDType& playerID) {
     pgs = new PortfolioGreedySearchNoTime(_playerID, PlayerModels::NOKDPS, 1, 0, 40);
     lastTime = 0;
     _controlScriptRepeat = 0;
+    std::cout<<"ABPGSwithRepeatAction"<<std::endl;
 }
 
 void ABPGSwithRepeatAction::getMoves(GameState& state, const MoveArray& moves, std::vector<Action>& moveVec) {
@@ -54,8 +55,7 @@ void ABPGSwithRepeatAction::getMoves(GameState& state, const MoveArray& moves, s
         if (_controlScriptRepeat == 0) {
             currentScriptData = pgs->searchForScripts(_playerID, state);
             data = new UnitScriptData(currentScriptData);
-            _controlScriptRepeat++;
-            std::cout << " Tempo total do PGS " << ms << std::endl;
+            _controlScriptRepeat++;            
         } else {
             currentScriptData = *data;
             _controlScriptRepeat++;
@@ -83,7 +83,6 @@ void ABPGSwithRepeatAction::getMoves(GameState& state, const MoveArray& moves, s
         for (auto & un : _unitAbsAB) {
             unitAbsAB.insert(un);
         }
-        std::cout << " Tempo total para AB " << 40 - ms << std::endl;
         alphaBeta->setLimitTime(40 - ms);
         alphaBeta->doSearchWithMoves(state, currentScriptData, unitAbsAB, _playerID);
         movecAB.assign(alphaBeta->getResults().bestMoves.begin(), alphaBeta->getResults().bestMoves.end());
@@ -131,7 +130,6 @@ void ABPGSwithRepeatAction::getMoves(GameState& state, const MoveArray& moves, s
         if (gABPGS.getState().eval(_playerID, SparCraft::EvaluationMethods::LTD2) >
                 gPGS.getState().eval(_playerID, SparCraft::EvaluationMethods::LTD2)) {
             moveVec.assign(alphaBeta->getResults().bestMoves.begin(), alphaBeta->getResults().bestMoves.end());
-            std::cout << "Escolhemos o ABPGS" << std::endl;
         } else {
             moveVec = moveVecPgs;
         }
@@ -153,8 +151,7 @@ void ABPGSwithRepeatAction::getMoves(GameState& state, const MoveArray& moves, s
      */
     ms = t.getElapsedTimeInMilliSec();
     //printf("\nGenerationClass   Execução completa %lf ms\n", ms);
-
-    std::cout << "************* FIM GenerationClass  **************" << std::endl;
+    
 
 
     /*

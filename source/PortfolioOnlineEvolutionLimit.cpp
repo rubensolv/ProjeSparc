@@ -147,7 +147,7 @@ std::vector<Action> PortfolioOnlineEvolutionLimit::search(const IDType & player,
 UnitScriptData PortfolioOnlineEvolutionLimit::searchForScripts(const IDType& player, const GameState& state){
     Timer t;
     t.start();
-    std::cout<<"Search For Scripts POELimit "<<std::endl;
+    //std::cout<<"Search For Scripts POELimit "<<std::endl;
     const IDType enemyPlayer(state.getEnemy(player));
 
     double ms = t.getElapsedTimeInMilliSec();
@@ -170,15 +170,15 @@ UnitScriptData PortfolioOnlineEvolutionLimit::searchForScripts(const IDType& pla
     	ms = t.getElapsedTimeInMilliSec();
         if(scoreFitness < tmpEval  and maxChange < 2){
             scoreFitness = tmpEval;
-            std::cout<<"Score Fitness Parcial = "<< (double) tmpEval.val()<<std::endl;
+            //std::cout<<"Score Fitness Parcial = "<< (double) tmpEval.val()<<std::endl;
             maxChange = 0;
         }else{
-            std::cout<<"Score Fitness Final = "<< (double) scoreFitness.val() <<std::endl;
+            //std::cout<<"Score Fitness Final = "<< (double) scoreFitness.val() <<std::endl;
             if(maxChange >=1){
-                std::cout<<"Parei o Fitness"<<std::endl;
+                //std::cout<<"Parei o Fitness"<<std::endl;
                 break;
             }else{
-                std::cout<<"Incrementei MaxChange"<<std::endl;
+                //std::cout<<"Incrementei MaxChange"<<std::endl;
                 maxChange++;
             }
             

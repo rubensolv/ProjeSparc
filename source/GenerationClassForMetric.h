@@ -8,6 +8,7 @@
  */
 
 #include <stdlib.h>
+#include <string.h>
 #include "Player.h"
 #include "AlphaBetaSearchParameters.hpp"
 #include "AlphaBetaSearchAbstract.h"
@@ -20,7 +21,7 @@ namespace SparCraft {
     class AlphaBetaSearchAbstract;
     class PortfolioGreedySearchNoTime;
     
-    struct lex_compare {
+    struct lex_cm {
 
         bool operator()(const Unit & lUn, const Unit & rUn) const {
             return lUn < rUn;
@@ -28,21 +29,21 @@ namespace SparCraft {
     };
     
 
-    class GenerationClass : public Player {
+    class GenerationClassForMetric : public Player {
         AlphaBetaSearchAbstract * alphaBeta;
         PortfolioGreedySearchNoTime * pgs;
         std::map<Unit, std::vector<Unit>> _unAttack;
         std::vector<Unit> _UnReut;
-        std::set<Unit, lex_compare> _unitAbsAB;
+        std::set<Unit, lex_cm> _unitAbsAB;
         TimeType lastTime;
+        std::vector< std::vector<Unit> > _vecAbstracao;
+        int _controlNumAbs;
     public:
-        GenerationClass(const IDType & playerID);
+        GenerationClassForMetric(const IDType & playerID);
         void getMoves(GameState & state, const MoveArray & moves, std::vector<Action> & moveVec);
-        void getMoves3(GameState & state, const MoveArray & moves, std::vector<Action> & moveVec);
-        void getMoves2(GameState & state, const MoveArray & moves, std::vector<Action> & moveVec);
 
         IDType getType() {
-            return PlayerModels::GenerationClass;
+            return PlayerModels::GenerationClassForMetric;
         }
         void listaOrdenada(const IDType & playerID, const Unit & unidade, GameState & state, std::vector<Unit> & unidades);
         void listaOrdenadaForMoves(const IDType & playerID, const Unit & unidade, GameState & state, std::vector<Unit> & unidades, const MoveArray & moves);
@@ -75,6 +76,11 @@ namespace SparCraft {
 
         //ideia de analisar as ações dada à uma unidade
         void analisarAbstractForm(GameState newState, std::vector<Unit> unidadesInimigas);
+        
+        //controla a inicialição das abstrações para métrica
+        void iniciaAbstracao(GameState& state);
+        std::vector<Unit> copiaVector(std::vector<Unit> original);
+        void printMedia(GameState& state);
     };
 }
 

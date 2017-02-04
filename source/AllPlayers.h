@@ -33,6 +33,7 @@
 #include "ABPGSwithRepeatAction.h"
 #include "ABPOELimitWithRepeatAction.h"
 #include "GenerationClassWithClosest.h"
+#include "GenerationClassForMetric.h"
 #include "Player_MoveForward.h"
 #include "Player_MoveBackward.h"
 
