@@ -551,6 +551,10 @@ void SearchExperiment::addPlayer(const std::string & line)
     { 
         players[playerID].push_back(PlayerPtr(new GenerationClassForMetric(playerID)));
     }
+        else if (playerModelID == PlayerModels::GenerationClassForMonit)				
+    { 
+        players[playerID].push_back(PlayerPtr(new GenerationClassForMonit(playerID)));
+    }
 else if (playerModelID == PlayerModels::ImprovedPortfolioGreedySearch)
     {
         std::string enemyPlayerModel;

@@ -756,7 +756,7 @@ void GenerationClassForMetric::gerarCombinacoes(std::vector<std::string>& combin
     /* Armazena cada combinação. */
     char str[31] ;
 
-    strcpy(input, "01234567");
+    strcpy(input, "0123456789*&");
     r = 4;
 
     
