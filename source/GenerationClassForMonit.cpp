@@ -57,10 +57,12 @@ void GenerationClassForMonit::getMoves(GameState& state, const MoveArray& moves,
 
         //aplico AB
         doAlphaBeta(newState, moveVec, state);
-
+    
+        std::cout<<"Escolhemos o AB"<<std::endl;
+        std::cout<<"LTD2=  "<< newState.eval(_playerID, SparCraft::EvaluationMethods::LTD2).val()  <<std::endl;
         //limpo o state por segurança        
         copiarStateCleanUnit(state, newState);
-        std::cout<<"Escolhemos o AB"<<std::endl;
+        
     } else {
 
 
