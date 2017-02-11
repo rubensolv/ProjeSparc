@@ -1,8 +1,8 @@
-#include "Player_PortfolioGreedySearch.h"
+#include "Player_PGSAA.h"
 
 using namespace SparCraft;
 
-Player_PortfolioGreedySearch::Player_PortfolioGreedySearch (const IDType & playerID) 
+Player_PGSAA::Player_PGSAA (const IDType & playerID) 
 {
 	_playerID = playerID;
 	_iterations = 1;
@@ -10,7 +10,7 @@ Player_PortfolioGreedySearch::Player_PortfolioGreedySearch (const IDType & playe
 	_seed = PlayerModels::NOKDPS;
 }
 
-Player_PortfolioGreedySearch::Player_PortfolioGreedySearch (const IDType & playerID, const IDType & seed, const size_t & iter, const size_t & responses, const size_t & timeLimit)
+Player_PGSAA::Player_PGSAA (const IDType & playerID, const IDType & seed, const size_t & iter, const size_t & responses, const size_t & timeLimit)
 {
 	_playerID = playerID;
 	_iterations = iter;
@@ -19,10 +19,10 @@ Player_PortfolioGreedySearch::Player_PortfolioGreedySearch (const IDType & playe
     _timeLimit = timeLimit;
 }
 
-void Player_PortfolioGreedySearch::getMoves(GameState & state, const MoveArray & moves, std::vector<Action> & moveVec)
+void Player_PGSAA::getMoves(GameState & state, const MoveArray & moves, std::vector<Action> & moveVec)
 {
     moveVec.clear();
-	PortfolioGreedySearch pgs(_playerID, _seed, _iterations, _responses, _timeLimit);
+	PGSAA pgs(_playerID, _seed, _iterations, _responses, _timeLimit);
 
 	moveVec = pgs.search(_playerID, state);
 }

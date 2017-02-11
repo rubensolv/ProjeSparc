@@ -15,6 +15,7 @@ Player * AllPlayers::getPlayer(const IDType & playerID, const IDType & type)
 	else if		(type == PlayerModels::Random)				{ return new Player_Random(playerID); }
 	else if		(type == PlayerModels::MoveForward)			{ return new Player_MoveForward(playerID); }
 	else if		(type == PlayerModels::MoveBackward)		{ return new Player_MoveBackward(playerID); }
+        else if		(type == PlayerModels::AbstractScript)		{ return new AbstractScript(playerID); }
 	else													{ return NULL; }
 }
 
@@ -31,5 +32,6 @@ PlayerPtr AllPlayers::getPlayerPtr(const IDType & playerID, const IDType & type)
 	else if		(type == PlayerModels::Random)				{ return PlayerPtr(new Player_Random(playerID)); }
 	else if		(type == PlayerModels::MoveForward)			{ return PlayerPtr(new Player_MoveForward(playerID)); }
 	else if		(type == PlayerModels::MoveBackward)		{ return PlayerPtr(new Player_MoveBackward(playerID)); }
+        else if		(type == PlayerModels::AbstractScript)		{ return PlayerPtr(new AbstractScript(playerID)); }
 	else													{ return PlayerPtr(new Player_NOKDPS(playerID)); }
 }

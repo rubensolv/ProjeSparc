@@ -240,6 +240,65 @@ const StateEvalScore Game::playoutGenome(const IDType & player, PortfolioOnlineG
     return state.evalSimLimited(player, PlayerModels::NOKDPS, PlayerModels::NOKDPS, limit);
 }
 
+const StateEvalScore Game::playIndividualScriptsAndActions(const IDType & player, UnitScriptData& scriptData, std::map<Unit, Action>& map_abs_action, int limit) 
+{
+ // array which will hold all the script moves for players
+    Array2D<std::vector<Action>, Constants::Num_Players, PlayerModels::Size> allScriptMoves;
+
+    scriptMoves[Players::Player_One] = std::vector<Action>(state.numUnits(Players::Player_One));
+    scriptMoves[Players::Player_Two] = std::vector<Action>(state.numUnits(Players::Player_Two));
+
+    t.start();
+
+    // play until there is no winner
+ 
+
+        Timer frameTimer;
+        frameTimer.start();
+
+        // clear all script moves for both players
+        for (IDType p(0); p<Constants::Num_Players; p++)
+        {
+            for (IDType s(0); s<PlayerModels::Size; ++s)
+            {
+                allScriptMoves[p][s].clear();
+            }
+        }
+
+        // clear the moves we will actually be doing
+        scriptMoves[0].clear();
+        scriptMoves[1].clear();
+
+        // the playr that will move next
+        const IDType playerToMove(getPlayerToMove());
+        const IDType enemyPlayer(state.getEnemy(playerToMove));
+
+        // generate the moves possible from this state
+        state.generateMoves(moves[playerToMove], playerToMove);
+
+        // calculate the moves the unit would do given its script preferences
+        scriptData.calculateMovesAndActions(playerToMove, moves[playerToMove], state, scriptMoves[playerToMove], map_abs_action);
+
+        // if both players can move, generate the other player's moves
+        if (state.bothCanMove())
+        {
+            state.generateMoves(moves[enemyPlayer], enemyPlayer);
+            scriptData.calculateMovesAndActions(enemyPlayer, moves[enemyPlayer], state, scriptMoves[enemyPlayer], map_abs_action);
+            state.makeMoves(scriptMoves[enemyPlayer]);
+        }
+
+        // make the moves
+        state.makeMoves(scriptMoves[playerToMove]);
+        state.finishedMoving();        
+    
+
+    gameTimeMS = t.getElapsedTimeInMilliSec();
+    return state.evalSimLimited(player, PlayerModels::NOKDPS, PlayerModels::NOKDPS, limit);
+}
+
+
+
+
 // play the game until there is a winner
 void Game::playIndividualScripts(UnitScriptData & scriptData)
 {

@@ -104,7 +104,7 @@ namespace SparCraft {
             PortfolioGreedySearch, PortfolioOnlineEvolution, UCT, ImprovedPortfolioGreedySearch, StratifiedPolicySearch, AdaptableStratifiedPolicySearch,
             IRStratifiedPolicySearch, MoveForward, MoveBackward, GenerationClass, ABPOEFixo, ABPOELimit, ABPGSSand,
             ABPGSPlus, ABPGSwithRepeatAction, ABPOELimitWithRepeatAction, GenerationClassWithClosest, 
-            GenerationClassForMetric, GenerationClassForMonit, None, Size
+            GenerationClassForMetric, GenerationClassForMonit, Player_PGSAA, AbstractScript, None, Size
         };
 
         static void init() {
@@ -141,6 +141,8 @@ namespace SparCraft {
             setData(GenerationClassWithClosest, "GenerationClassWithClosest");
             setData(GenerationClassForMetric, "GenerationClassForMetric");
             setData(GenerationClassForMonit, "GenerationClassForMonit");
+            setData(Player_PGSAA, "Player_PGSAA");
+            setData(AbstractScript, "AbstractScript");
             setData(None, "None");
 
         }

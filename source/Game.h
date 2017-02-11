@@ -47,6 +47,7 @@ public:
 	void            play();
     void            playNextTurn();
     void            playIndividualScripts(UnitScriptData & scriptsChosen);
+    const StateEvalScore             playIndividualScriptsAndActions(const IDType & player, UnitScriptData & scriptData, std::map<Unit, Action>& map_abs_action, int limit);
     const StateEvalScore playLimitedIndividualScripts(const IDType & player, UnitScriptData & scriptsChosen, int limit);
     const StateEvalScore playoutGenome(const IDType & player, PortfolioOnlineGenome & genome, int limit);
 	void            storeHistory(const bool & store);

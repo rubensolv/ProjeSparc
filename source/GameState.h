@@ -79,6 +79,7 @@ public:
     const Unit &            getNeutralUnit(const size_t & u)                                        const;
     void                    removeUnit(const Unit & un);
     void                    cleanUpStateUnits();
+    int                     getIndexUnit(const IDType & player, const IDType & unitID) const;
     int                     getIndexUnit(const IDType & player, const IDType & unitID);
     bool                    unitExist(const IDType & player, const IDType & unitID);
     
@@ -108,6 +109,7 @@ public:
 
     // move related functions
     void                    generateMoves(MoveArray & moves, const IDType & playerIndex)            const;
+    void                    generateMovesForUnit(std::vector<Action> & moves, const IDType & playerIndex, const IDType & unitID)            const;
     void                    makeMoves(const std::vector<Action> & moves);
     const int &             getNumMovements(const IDType & player)                                  const;
     const IDType            whoCanMove()                                                            const;

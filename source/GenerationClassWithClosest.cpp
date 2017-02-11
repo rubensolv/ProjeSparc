@@ -563,8 +563,8 @@ void GenerationClassWithClosest::iniciarAlphaBeta() {
 
     // set the parameters from the options in the file
     params.setMaxPlayer(_playerID);
-    params.setTimeLimit(25);
-    params.setMaxChildren(0);
+    params.setTimeLimit(40);
+    params.setMaxChildren(20);
     params.setMoveOrderingMethod(moveOrderingID);
     params.setEvalMethod(evalMethodID);
     params.setSimScripts(playoutScriptID1, playoutScriptID2);

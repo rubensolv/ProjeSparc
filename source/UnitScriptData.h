@@ -34,6 +34,7 @@ public:
     UnitScriptData();
 
     void calculateMoves(const IDType & player, MoveArray & moves, GameState & state, std::vector<Action> & moveVec);
+    void calculateMovesAndActions(const IDType & player, MoveArray & moves, GameState & state, std::vector<Action> & moveVec, std::map<Unit, Action>& map_abs_action);
     void setUnitScript(const IDType & player, const int & id, const IDType & script);
     void setUnitScript(const Unit & unit, const IDType & script);
 

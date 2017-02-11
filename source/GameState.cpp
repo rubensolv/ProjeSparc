@@ -108,6 +108,162 @@ const HashType GameState::calculateHash(const size_t & hashNum) const
 	return hash;
 }
 
+
+void GameState::generateMovesForUnit(std::vector<Action> & moves, const IDType& playerIndex, const IDType& unitID) const 
+{
+	moves.clear();
+
+    // which is the enemy player
+	IDType enemyPlayer  = getEnemy(playerIndex);
+
+    // make sure this player can move right now
+    const IDType canMove(whoCanMove());
+    if (canMove == enemyPlayer)
+    {
+        System::FatalError("GameState Error - Called generateMoves() for a player that cannot currently move");
+    }
+
+	// we are interested in all simultaneous moves
+	// so return all units which can move at the same time as the first
+	TimeType firstUnitMoveTime = getUnit(playerIndex, 0).firstTimeFree();
+        
+	//adequações
+        std::vector<Unit> tmpUnit;
+        tmpUnit.push_back(getUnitByID(playerIndex, unitID));
+        IDType unitIndex = (IDType) getIndexUnit(playerIndex, unitID);
+        
+	for (auto & un : tmpUnit)
+	{
+		// unit reference
+		const Unit & unit(getUnit(playerIndex,unitIndex));
+			
+		// if this unit can't move at the same time as the first
+		if (unit.firstTimeFree() != firstUnitMoveTime)
+		{
+			// stop checking
+			break;
+		}
+
+		if (unit.previousActionTime() == _currentTime && _currentTime != 0)
+		{
+            System::FatalError("Previous Move Took 0 Time: " + unit.previousAction().moveString());
+		}
+
+		//moves.addUnit();
+
+		// generate attack moves
+		if (unit.canAttackNow())
+		{
+			for (IDType u(0); u<_numUnits[enemyPlayer]; ++u)
+			{
+				const Unit & enemyUnit(getUnit(enemyPlayer, u));
+				bool invisible = false;
+				if (enemyUnit.type().hasPermanentCloak())
+				{
+					invisible = true;
+					for (IDType detectorIndex(0); detectorIndex < _numUnits[playerIndex]; ++detectorIndex)
+					{
+						// unit reference
+						const Unit & detector(getUnit(playerIndex, detectorIndex));
+						if (detector.type().isDetector() && detector.canSeeTarget(enemyUnit, _currentTime))
+						{
+							invisible = false;
+							break;
+						}
+					}
+				}
+				if (!invisible && unit.canAttackTarget(enemyUnit, _currentTime) && enemyUnit.isAlive())
+				{
+					moves.push_back(Action(unitIndex, playerIndex, ActionTypes::ATTACK, u));
+                    //moves.add(Action(unitIndex, playerIndex, ActionTypes::ATTACK, unit.ID()));
+				}
+			}
+		}
+		else if (unit.canHealNow())
+		{
+			for (IDType u(0); u<_numUnits[playerIndex]; ++u)
+			{
+				// units cannot heal themselves in broodwar
+				if (u == unitIndex)
+				{
+					continue;
+				}
+
+				const Unit & ourUnit(getUnit(playerIndex, u));
+				if (unit.canHealTarget(ourUnit, _currentTime) && ourUnit.isAlive())
+				{
+					moves.push_back(Action(unitIndex, playerIndex, ActionTypes::HEAL, u));
+                    //moves.add(Action(unitIndex, playerIndex, ActionTypes::HEAL, unit.ID()));
+				}
+			}
+		}
+		// generate the wait move if it can't attack yet
+		else
+		{
+			if (!unit.canHeal())
+			{
+				moves.push_back(Action(unitIndex, playerIndex, ActionTypes::RELOAD, 0));
+			}
+		}
+		
+		// generate movement moves
+		if (unit.isMobile())
+		{
+            // In order to not move when we could be shooting, we want to move for the minimum of:
+            // 1) default move distance move time
+            // 2) time until unit can attack, or if it can attack, the next cooldown
+            double timeUntilAttack          = unit.nextAttackActionTime() - getTime();
+            timeUntilAttack                 = timeUntilAttack == 0 ? unit.attackCooldown() : timeUntilAttack;
+
+            // the default move duration
+            double defaultMoveDuration      = (double)Constants::Move_Distance / unit.speed();
+
+            // if we can currently attack
+			double chosenTime = timeUntilAttack != 0 ? std::min(timeUntilAttack, defaultMoveDuration) : defaultMoveDuration;
+
+            // the chosen movement distance
+            PositionType moveDistance       = (PositionType)(chosenTime * unit.speed());
+
+            // DEBUG: If chosen move distance is ever 0, something is wrong
+            if (moveDistance == 0)
+            {
+                System::FatalError("Move Action with distance 0 generated. timeUntilAttack:"+
+					std::to_string(timeUntilAttack)+", speed:"+std::to_string(unit.speed()));
+            }
+
+            // we are only generating moves in the cardinal direction specified in common.h
+			for (IDType d(0); d<Constants::Num_Directions; ++d)
+			{			
+                // the direction of this movement
+              	Position dir(Constants::Move_Dir[d][0], Constants::Move_Dir[d][1]);
+            
+                if (moveDistance == 0)
+                {
+                    printf("%lf %lf %lf\n", timeUntilAttack, defaultMoveDuration, chosenTime);
+                }
+
+                // the final destination position of the unit
+                Position dest = unit.pos() + Position(moveDistance*dir.x(), moveDistance*dir.y());
+
+                // if that poisition on the map is walkable
+                if (isWalkable(dest) || (unit.type().isFlyer() && isFlyable(dest)))
+				{
+                    // add the move to the MoveArray
+					moves.push_back(Action(unitIndex, playerIndex, ActionTypes::MOVE, d, dest));
+				}
+			}
+		}
+
+		// if no moves were generated for this unit, it must be issued a 'PASS' move
+		if (moves.size() == 0)
+		{
+			moves.push_back(Action(unitIndex, playerIndex, ActionTypes::PASS, 0));
+		}
+	}
+}
+
+
+
 void GameState::generateMoves(MoveArray & moves, const IDType & playerIndex) const
 {
 	moves.clear();
@@ -263,8 +419,14 @@ void GameState::makeMoves(const std::vector<Action> & moves)
     {
         const IDType canMove(whoCanMove());
         const IDType playerToMove(moves[0].player());
+        
         if (canMove == getEnemy(playerToMove))
         {
+            //std::cout << "Dentro do makemoves " << (int) moves[0].player() << std::endl;
+            for(auto & mv : moves) 
+            {
+                std::cout << mv.debugString() << std::endl;
+            }
             System::FatalError("GameState Error - Called makeMove() for a player that cannot currently move");
         }
     }
@@ -639,6 +801,17 @@ Unit & GameState::getUnit(const IDType & player, const UnitCountType & unitIndex
 const Unit & GameState::getUnit(const IDType & player, const UnitCountType & unitIndex) const
 {
     return _units[player][_unitIndex[player][unitIndex]];
+}
+
+int GameState::getIndexUnit(const IDType& player, const IDType& unitID) const{
+    for (IDType unitIndex(0); unitIndex < _numUnits[player]; ++unitIndex)
+	{
+		// unit reference
+		const Unit & unit(getUnit(player,unitIndex));
+                if(unit.ID() == unitID){
+                    return unitIndex;
+                }
+        }
 }
 
 int GameState::getIndexUnit(const IDType& player, const IDType& unitID){

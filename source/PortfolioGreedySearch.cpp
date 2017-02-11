@@ -212,8 +212,9 @@ StateEvalScore PortfolioGreedySearch::eval(const IDType & player, const GameStat
 
 	_totalEvals++;
 
+        //return g.playLimitedIndividualScripts(player, playerScriptsChosen, 4);
     g.playIndividualScripts(playerScriptsChosen);
-	return g.getState().eval(player, SparCraft::EvaluationMethods::LTD2);
+    return g.getState().eval(player, SparCraft::EvaluationMethods::LTD2);
 }
 
 void  PortfolioGreedySearch::setAllScripts(const IDType & player, const GameState & state, UnitScriptData & data, const IDType & script)

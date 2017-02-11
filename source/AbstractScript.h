@@ -14,13 +14,15 @@ namespace SparCraft {
      |    a) If it is in range to attack an enemy, move away from closest
      |    b) If it is not in range of enemy, MOVE towards closest
      `----------------------------------------------------------------------*/
-    class Player_Kiter : public Player {
+    class AbstractScript : public Player {
+        Action _singleAction;
     public:
-        Player_Kiter(const IDType & playerID);
+        AbstractScript(const IDType & playerID);
+        AbstractScript(const IDType & playerID, Action action);
         void getMoves(GameState & state, const MoveArray & moves, std::vector<Action> & moveVec);
-
+        void setMoviment(Action moviment);
         IDType getType() {
-            return PlayerModels::Kiter;
+            return PlayerModels::AbstractScript;
         }
     private:
         

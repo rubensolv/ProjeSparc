@@ -35,6 +35,8 @@
 #include "GenerationClassWithClosest.h"
 #include "GenerationClassForMetric.h"
 #include "GenerationClassForMonit.h"
+#include "Player_PGSAA.h"
+#include "AbstractScript.h"
 #include "Player_MoveForward.h"
 #include "Player_MoveBackward.h"
 

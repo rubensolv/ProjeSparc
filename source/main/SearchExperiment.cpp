@@ -569,6 +569,21 @@ else if (playerModelID == PlayerModels::ImprovedPortfolioGreedySearch)
 
         players[playerID].push_back(PlayerPtr(new Player_ImprovedPortfolioGreedySearch(playerID, PlayerModels::getID(enemyPlayerModel), iterations, responses, timeLimit)));
     }
+    else if (playerModelID == PlayerModels::Player_PGSAA)
+    {
+        std::string enemyPlayerModel;
+        size_t timeLimit(40);
+        int iterations(1);
+        int responses(0);
+
+        iss >> timeLimit;
+        iss >> enemyPlayerModel;
+        iss >> iterations;
+        iss >> responses;
+
+        players[playerID].push_back(PlayerPtr(new Player_PGSAA(playerID, PlayerModels::getID(enemyPlayerModel), iterations, responses, timeLimit)));
+    }
+    
     else if (playerModelID == PlayerModels::PortfolioOnlineEvolution)
     {
         std::string enemyPlayerModel;
