@@ -517,7 +517,9 @@ void SearchExperiment::addPlayer(const std::string & line)
     }
         else if (playerModelID == PlayerModels::GenerationClass)				
     { 
-        players[playerID].push_back(PlayerPtr(new GenerationClass(playerID))); 
+        int numUnitsControl(0);
+        iss >> numUnitsControl;
+        players[playerID].push_back(PlayerPtr(new GenerationClass(playerID, numUnitsControl))); 
     }
         else if (playerModelID == PlayerModels::ABPOEFixo)				
     { 
@@ -525,7 +527,9 @@ void SearchExperiment::addPlayer(const std::string & line)
     }
         else if (playerModelID == PlayerModels::ABPOELimit)				
     { 
-        players[playerID].push_back(PlayerPtr(new ABPOELimit(playerID)));
+        int numUnitsControl(0);
+        iss >> numUnitsControl;
+        players[playerID].push_back(PlayerPtr(new ABPOELimit(playerID, numUnitsControl)));
     }
         else if (playerModelID == PlayerModels::ABPGSSand)				
     { 

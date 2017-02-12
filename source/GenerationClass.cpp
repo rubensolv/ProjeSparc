@@ -8,6 +8,15 @@ GenerationClass::GenerationClass(const IDType& playerID) {
     iniciarAlphaBeta();
     pgs = new PortfolioGreedySearchNoTime(_playerID, PlayerModels::NOKDPS, 1, 0, 40);
     lastTime = 0;
+    numUnits = 4;
+}
+
+GenerationClass::GenerationClass(const IDType& playerID, int numUnitsAB) {
+    _playerID = playerID;
+    iniciarAlphaBeta();
+    pgs = new PortfolioGreedySearchNoTime(_playerID, PlayerModels::NOKDPS, 1, 0, 40);
+    lastTime = 0;
+    numUnits = numUnitsAB;
 }
 
 
@@ -190,7 +199,6 @@ bool GenerationClass::unitsInMoves(GameState& state, const MoveArray& moves) {
 //e faço controle e manutenção destas
 
 void GenerationClass::controlUnitsForAB(GameState & state, const MoveArray & moves) {
-    int numUnits = 4;
     //verifico se as unidades não foram mortas
     std::set<Unit, lex_compare> tempUnitAbsAB;
     for (auto & un : _unitAbsAB) {
@@ -218,8 +226,7 @@ void GenerationClass::controlUnitsForAB(GameState & state, const MoveArray & mov
                 control++;
             }
         }
-    }
-
+    }    
 }
 
 void GenerationClass::getMoves3(GameState& state, const MoveArray& moves, std::vector<Action>& moveVec) {

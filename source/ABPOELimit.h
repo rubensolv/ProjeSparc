@@ -35,8 +35,10 @@ namespace SparCraft {
         std::vector<Unit> _UnReut;
         std::set<Unit, lex_compare_PoeL> _unitAbsAB;
         TimeType lastTime;
+        int numUnits;
     public:
         ABPOELimit(const IDType & playerID);
+        ABPOELimit(const IDType & playerID, int numUnitsAB);
         void getMoves(GameState & state, const MoveArray & moves, std::vector<Action> & moveVec);
 
         IDType getType() {

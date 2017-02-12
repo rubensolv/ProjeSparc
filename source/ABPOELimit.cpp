@@ -8,8 +8,16 @@ ABPOELimit::ABPOELimit(const IDType& playerID) {
     iniciarAlphaBeta();
     poe = new PortfolioOnlineEvolutionLimit(_playerID, PlayerModels::NOKDPS, 1, 0, 40);
     lastTime = 0;
+    numUnits = 4;
 }
 
+ABPOELimit::ABPOELimit(const IDType& playerID, int numUnitsAB) {
+    _playerID = playerID;
+    iniciarAlphaBeta();
+    poe = new PortfolioOnlineEvolutionLimit(_playerID, PlayerModels::NOKDPS, 1, 0, 40);
+    lastTime = 0;
+    numUnits = numUnitsAB;
+}
 
 
 void ABPOELimit::getMoves(GameState& state, const MoveArray& moves, std::vector<Action>& moveVec) {
@@ -189,7 +197,6 @@ bool ABPOELimit::unitsInMoves(GameState& state, const MoveArray& moves) {
 //e faço controle e manutenção destas
 
 void ABPOELimit::controlUnitsForAB(GameState & state, const MoveArray & moves) {
-    int numUnits = 4;
     //verifico se as unidades não foram mortas
     std::set<Unit, lex_compare_PoeL> tempUnitAbsAB;
     for (auto & un : _unitAbsAB) {
@@ -218,7 +225,7 @@ void ABPOELimit::controlUnitsForAB(GameState & state, const MoveArray & moves) {
             }
         }
     }
-
+    std::cout<<"NUm units controladas="<<numUnits<< "  total do vetor "<< _unitAbsAB.size() << std::endl;
 }
 
 void ABPOELimit::analisarAbstractForm(GameState newState, std::vector<Unit> unidadesInimigas) {

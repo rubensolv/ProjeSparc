@@ -35,8 +35,10 @@ namespace SparCraft {
         std::vector<Unit> _UnReut;
         std::set<Unit, lex_compare> _unitAbsAB;
         TimeType lastTime;
+        int numUnits;
     public:
         GenerationClass(const IDType & playerID);
+        GenerationClass(const IDType & playerID, int numUnitsAB);
         void getMoves(GameState & state, const MoveArray & moves, std::vector<Action> & moveVec);
         void getMoves3(GameState & state, const MoveArray & moves, std::vector<Action> & moveVec);
         void getMoves2(GameState & state, const MoveArray & moves, std::vector<Action> & moveVec);
