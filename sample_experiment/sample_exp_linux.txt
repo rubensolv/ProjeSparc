@@ -78,11 +78,11 @@ Player 1 PortfolioOnlineEvolution 40 NOKDPS 1 0
 #Player 1 IRStratifiedPolicySearch 40 NOKDPS 1 0
 
 # Sample Scripted Players
-#Player 0 GenerationClass 5
+#Player 0 GenerationClass 4
 #Player 0 GenerationClassForMetric
 #Player 1 GenerationClassForMonit
 #Player 0 ABPOEFixo
-Player 0 ABPOELimit 6
+Player 0 ABPOELimit 4
 #Player 0 ABPGSPlus
 #Player 1 Kiter
 #Player 0 ABPGSSand

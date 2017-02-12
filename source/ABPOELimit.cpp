@@ -224,8 +224,7 @@ void ABPOELimit::controlUnitsForAB(GameState & state, const MoveArray & moves) {
                 control++;
             }
         }
-    }
-    std::cout<<"NUm units controladas="<<numUnits<< "  total do vetor "<< _unitAbsAB.size() << std::endl;
+    }    
 }
 
 void ABPOELimit::analisarAbstractForm(GameState newState, std::vector<Unit> unidadesInimigas) {
