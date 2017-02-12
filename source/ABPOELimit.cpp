@@ -130,6 +130,7 @@ void ABPOELimit::getMoves(GameState& state, const MoveArray& moves, std::vector<
             if (gABPGS.getState().eval(_playerID, SparCraft::EvaluationMethods::LTD2) >
                     gPGS.getState().eval(_playerID, SparCraft::EvaluationMethods::LTD2)) {
                 moveVec.assign(alphaBeta->getResults().bestMoves.begin(), alphaBeta->getResults().bestMoves.end());
+                std::cout<<"POE - Escolhemos o ABPOE"<<std::endl;
             } else {
                 moveVec = moveVecPgs;
             }

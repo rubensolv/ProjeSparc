@@ -68,7 +68,7 @@
 #Player 1 ImprovedPortfolioGreedySearch 80 NOKDPS 3 0
 #Player 0 ImprovedPortfolioGreedySearch 40 NOKDPS 1 0
 #Player 0 PortfolioGreedySearch 0 NOKDPS 1 0
-#Player 1 PortfolioOnlineEvolution 40 NOKDPS 1 0
+Player 1 PortfolioOnlineEvolution 40 NOKDPS 1 0
 #Player 0 Player_PGSAA 40 NOKDPS 1 0
 
 #Sample StratifiedPolicySearch Players
@@ -78,11 +78,11 @@
 #Player 1 IRStratifiedPolicySearch 40 NOKDPS 1 0
 
 # Sample Scripted Players
-Player 0 GenerationClass
+#Player 0 GenerationClass
 #Player 0 GenerationClassForMetric
-Player 1 GenerationClassForMonit
+#Player 1 GenerationClassForMonit
 #Player 0 ABPOEFixo
-#Player 0 ABPOELimit
+Player 0 ABPOELimit
 #Player 0 ABPGSPlus
 #Player 1 Kiter
 #Player 0 ABPGSSand
@@ -128,15 +128,15 @@ Player 1 GenerationClassForMonit
 # Sample SeparatedState States
 #State SeparatedState 70 128 128 400 360 840 360 Protoss_Dragoon 4 Terran_Marine 4
 #State SeparatedState 10 128 128 400 360 840 360 Protoss_Dragoon 5 Protoss_Zealot 5
-#State SeparatedState 100 128 128 400 360 840 360 Protoss_Dragoon 6
+#State SeparatedState 10 128 128 400 360 840 360 Zerg_Zergling 16
+#State SeparatedState 10 128 128 400 360 840 360 Protoss_Dragoon 16
 #State SeparatedState 100 128 128 400 360 840 360 Zerg_Zergling 15 Protoss_Dragoon 8
 #State SeparatedState 100 128 128 400 360 840 360 Protoss_Dragoon 4 Terran_Marine 4
 #State SeparatedState 100 128 128 400 360 840 360 Protoss_Dragoon 8 Protoss_Zealot 8
-#State SeparatedState 2 128 128 400 360 840 360 Zerg_Zergling 20
-#State SeparatedState 10 128 128 400 360 840 360 Protoss_Dragoon 25 Protoss_Zealot 25
+State SeparatedState 10 128 128 400 360 840 360 Protoss_Dragoon 10 Protoss_Zealot 10
 #State SeparatedState 4 128 128 400 360 840 360 Protoss_Dragoon 16 Terran_Marine 25
-State SeparatedState 100 128 128 400 360 840 360 Terran_Marine 20 Zerg_Zergling 20
-#State SeparatedState 20 128 128 400 360 840 360 Protoss_Zealot 8
+#State SeparatedState 100 128 128 400 360 840 360 Terran_Marine 20 Zerg_Zergling 20
+#State SeparatedState 10 128 128 400 360 840 360 Protoss_Zealot 16
 #State SeparatedState 50 128 128 400 360 840 360 Protoss_Dragoon 4 Protoss_Zealot 4 Zerg_Zergling 4 Terran_Marine 4
 #State SeparatedState 2 128 128 400 360 840 360 Protoss_Dragoon 32 Protoss_Zealot 32
 #State SeparatedState 2 128 128 400 360 840 360 Protoss_Zealot 16 Protoss_Dragoon 16

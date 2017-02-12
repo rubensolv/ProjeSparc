@@ -440,8 +440,7 @@ AlphaBetaValue AlphaBetaSearchAbstract::alphaBetaWithPGS(GameState & state, size
 
         }
     }
-
-
+    
     size_t moveNumber(0);
     std::vector<Action> moveVec;
 

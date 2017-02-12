@@ -132,7 +132,7 @@ void GenerationClass::getMoves(GameState& state, const MoveArray& moves, std::ve
             if (gABPGS.getState().eval(_playerID, SparCraft::EvaluationMethods::LTD2) >
                     gPGS.getState().eval(_playerID, SparCraft::EvaluationMethods::LTD2)) {
                 moveVec.assign(alphaBeta->getResults().bestMoves.begin(), alphaBeta->getResults().bestMoves.end());
-                std::cout<<"Escolhemos o ABPGS"<<std::endl;
+                std::cout<<"ABPGS - Escolhemos o ABPGS"<<std::endl;
             } else {
                 moveVec = moveVecPgs;
             }

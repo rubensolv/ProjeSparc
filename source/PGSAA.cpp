@@ -230,7 +230,7 @@ void  PGSAA::setAllScripts(const IDType & player, const GameState & state, UnitS
 //e faço controle e manutenção destas
 
 void PGSAA::controlUnits(GameState & state) {
-    int numUnits = 2;
+    int numUnits = 10;
     //verifico se as unidades não foram mortas
     std::set<Unit, compare> tempUnitAbsAB;
     for (auto & un : _unitAbstraction) {

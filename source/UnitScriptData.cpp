@@ -72,6 +72,7 @@ void UnitScriptData::calculateMovesAndActions(const IDType & player, MoveArray &
         // the move it would choose to do based on its associated script preference
         if(map_abs_action.find(unit) != map_abs_action.end()){
             unitMove = map_abs_action.find(unit)->second;
+            //std::cout<<" Movimentos trocado= "<< getMove(player, unitIndex, getUnitScript(unit)).debugString()<< "  por  "<< unitMove.debugString() <<std::endl;
         }else{
             unitMove = getMove(player, unitIndex, getUnitScript(unit));
         }
@@ -79,6 +80,12 @@ void UnitScriptData::calculateMovesAndActions(const IDType & player, MoveArray &
         // put the unit into the move vector
         moveVec.push_back(unitMove);
     }
+    /*
+    std::cout<<" Movimentos sugeridos pelo calculate"<<std::endl;
+    for(auto & mov : moveVec){
+        std::cout<<mov.debugString()<<std::endl;
+    }
+     * */
 
 }
 
