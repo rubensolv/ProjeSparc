@@ -199,6 +199,44 @@ bool GenerationClass::unitsInMoves(GameState& state, const MoveArray& moves) {
 //e faço controle e manutenção destas
 
 void GenerationClass::controlUnitsForAB(GameState & state, const MoveArray & moves) {
+    
+    std::set<Unit, lex_compare> tempUnitAbsAB;
+    for (auto & un : _unitAbsAB) {
+        if (state.unitExist(_playerID, un.ID()))  {
+            tempUnitAbsAB.insert(un);
+        }
+    }
+    _unitAbsAB = tempUnitAbsAB;
+    
+    if (state.numUnits(_playerID) <= numUnits) {
+        _unitAbsAB.clear();
+        //adiciono todas as unidades para serem controladas pelo AB
+        for (int u(0); u < state.numUnits(_playerID); ++u) {
+            if(state.getUnit(_playerID, u).type() == BWAPI::UnitTypes::Protoss_Zealot){
+                _unitAbsAB.insert(state.getUnit(_playerID, u));
+            }
+        }
+    } else if (!(_unitAbsAB.size() == numUnits)) {
+        
+        if ((state.numUnits(_playerID) < 2 or moves.numUnits() < 2)
+                and _unitAbsAB.size() == 0) {
+            if(state.getUnit(_playerID, 0).type() == BWAPI::UnitTypes::Protoss_Zealot){
+                _unitAbsAB.insert(state.getUnit(_playerID, 0));
+            }
+        } else {
+            int control = 0;
+            while (_unitAbsAB.size() < numUnits and control < 20) {
+                Unit un = state.getUnit(_playerID,rand() % state.numUnits(_playerID));
+                if(un.type() == BWAPI::UnitTypes::Protoss_Zealot){
+                    _unitAbsAB.insert(un);
+                }
+                control++;
+            }
+        }
+    }
+
+    
+    /*
     //verifico se as unidades não foram mortas
     std::set<Unit, lex_compare> tempUnitAbsAB;
     for (auto & un : _unitAbsAB) {
@@ -227,6 +265,7 @@ void GenerationClass::controlUnitsForAB(GameState & state, const MoveArray & mov
             }
         }
     }    
+     * */
 }
 
 void GenerationClass::getMoves3(GameState& state, const MoveArray& moves, std::vector<Action>& moveVec) {
